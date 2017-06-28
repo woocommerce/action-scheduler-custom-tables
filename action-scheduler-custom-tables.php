@@ -14,3 +14,6 @@ require_once( __DIR__ . '/vendor/autoload.php' );
 add_filter( 'action_scheduler_store_class', function( $class ) {
 	return DB_Store::class;
 }, 10, 1 );
+add_filter( 'action_scheduler_logger_class', function( $class ) {
+	return DB_Logger::class;
+}, 10, 1 );

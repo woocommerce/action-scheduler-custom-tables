@@ -18,8 +18,9 @@
 		<testsuite name="Action Scheduler Core">
 			<!-- runs the entire core test suite, but with this plugin active -->
 			<directory>../../action-scheduler/tests/phpunit</directory>
-			<!-- wpPostStore will fail due to unregistered taxonomy -->
-			<exclude>../../action-scheduler/tests/phpunit/jobstore</exclude>
+			<!-- wpPostStore and wpCommentLogger will fail, because they are not used -->
+			<exclude>../../action-scheduler/tests/phpunit/jobstore/ActionScheduler_wpPostStore_Test.php</exclude>
+			<exclude>../../action-scheduler/tests/phpunit/logging/ActionScheduler_wpCommentLogger_Test.php</exclude>
 		</testsuite>
 	</testsuites>
 	<groups>
