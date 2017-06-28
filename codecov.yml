@@ -1,0 +1,13 @@
+codecov:
+  branch: master
+
+coverage:
+  ignore:
+  - tests/.*
+  - vendor/.*
+  status:
+    project: false
+    patch: false
+    changes: false
+
+comment: false
