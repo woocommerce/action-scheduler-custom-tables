@@ -398,7 +398,7 @@ class DB_Store extends ActionScheduler_Store {
 	 * @return int The number of actions that were claimed
 	 * @throws \RuntimeException
 	 */
-	protected function claim_actions( $claim_id, $limit, DateTime $before_date = null ) {
+	protected function claim_actions( $claim_id, $limit, \DateTime $before_date = null ) {
 		/** @var \wpdb $wpdb */
 		global $wpdb;
 
@@ -406,14 +406,14 @@ class DB_Store extends ActionScheduler_Store {
 		$date = is_null( $before_date ) ? $now : clone $before_date;
 
 		// can't use $wpdb->update() because of the <= condition, using post_modified to take advantage of indexes
-		$sql = "UPDATE {$wpdb->actionscheduler_actions} SET claim_id=%d, last_attempt_gmt=%s, last_attempt_local=%s, status=%s WHERE claim_id = 0 AND scheduled_date_gmt <= %s ORDER BY attempts ASC, scheduled_date_gmt ASC LIMIT %d";
+		$sql = "UPDATE {$wpdb->actionscheduler_actions} SET claim_id=%d, last_attempt_gmt=%s, last_attempt_local=%s WHERE claim_id = 0 AND scheduled_date_gmt <= %s AND status=%s ORDER BY attempts ASC, scheduled_date_gmt ASC LIMIT %d";
 
 		$sql = $wpdb->prepare( $sql, [
 			$claim_id,
 			$now->format( 'Y-m-d H:i:s' ),
 			current_time( 'mysql' ),
-			self::STATUS_PENDING,
 			$date->format( 'Y-m-d H:i:s' ),
+			self::STATUS_PENDING,
 			$limit,
 		] );
 
@@ -456,23 +456,10 @@ class DB_Store extends ActionScheduler_Store {
 	}
 
 	public function release_claim( ActionScheduler_ActionClaim $claim ) {
-
-		$action_ids = $this->find_actions_by_claim_id( $claim->get_id() );
-		if ( empty( $action_ids ) ) {
-			return; // nothing to do
-		}
-		$action_id_string = implode( ',', array_map( 'intval', $action_ids ) );
-
 		/** @var \wpdb $wpdb */
 		global $wpdb;
-
-		$sql = "UPDATE {$wpdb->actionscheduler_actions} SET claim_id=0 WHERE action_id IN ($action_id_string) AND claim_id=%d";
-		$sql = $wpdb->prepare( $sql, [ $claim->get_id() ] );
-
-		$result = $wpdb->query( $sql );
-		if ( $result === false ) {
-			throw new \RuntimeException( sprintf( __( 'Unable to unlock claim %s. Database error.', 'action-scheduler' ), $claim->get_id() ) );
-		}
+		$wpdb->update( $wpdb->actionscheduler_actions, [ 'claim_id' => 0 ], [ 'claim_id' => $claim->get_id() ], [ '%d' ], [ '%d' ] );
+		$wpdb->delete( $wpdb->actionscheduler_claims, [ 'claim_id' => $claim->get_id() ], [ '%d' ] );
 	}
 
 	/**
