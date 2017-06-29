@@ -12,7 +12,11 @@ php:
 # Specify versions of WordPress to test against
 # WP_VERSION = WordPress version number (use "master" for SVN trunk)
 # WP_MULTISITE = whether to test multisite (use either "0" or "1")
+# AS_VERSION = branch of action-scheduler to test against
 env:
+  global:
+    - AS_VERSION=custom_tables
+  matrix:
     - WP_VERSION=4.8 WP_MULTISITE=0
     - WP_VERSION=4.7 WP_MULTISITE=0
     - WP_VERSION=4.6 WP_MULTISITE=0
