@@ -30,9 +30,9 @@ svn co --quiet https://develop.svn.wordpress.org/tags/$WP_VERSION/ /tmp/wordpres
 cp tests/travis/wp-tests-config.php $WP_TESTS_DIR/wp-tests-config.php
 
 # Grab the specified branch of Action Scheduler from github
-wget -nv -O /tmp/action-scheduler.zip https://github.com/Prospress/action-scheduler/archive/$AS_VERSION.zip
-unzip /tmp/action-scheduler.zip
-mv "/tmp/action-scheduler-$AS_VERSION" "$WP_CORE_DIR/wp-content/plugins/action-scheduler"
+wget -nv -O /tmp/action-scheduler.tgz https://github.com/Prospress/action-scheduler/tarball/$AS_VERSION
+mkdir -p "$WP_CORE_DIR/wp-content/plugins/action-scheduler"
+tar --strip-components=1 -zxmf /tmp/action-scheduler.tgz -C "$WP_CORE_DIR/wp-content/plugins/action-scheduler"
 
 cd ..
 mv $plugin_slug $plugin_dir
