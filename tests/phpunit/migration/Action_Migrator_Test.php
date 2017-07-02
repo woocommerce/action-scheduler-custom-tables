@@ -8,7 +8,7 @@ use ActionScheduler_SimpleSchedule;
 use ActionScheduler_wpPostStore;
 
 class Action_Migrator_Test extends UnitTestCase {
-	function setUp() {
+	public function setUp() {
 		parent::setUp();
 		if ( ! taxonomy_exists( ActionScheduler_wpPostStore::GROUP_TAXONOMY )  ) {
 			// register the post type and taxonomy necessary for the store to work

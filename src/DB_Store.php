@@ -283,7 +283,9 @@ class DB_Store extends ActionScheduler_Store {
 			$sql_params[] = $query[ 'per_page' ];
 		}
 
-		$sql = $wpdb->prepare( $sql, $sql_params );
+		if ( ! empty( $sql_params ) ) {
+			$sql = $wpdb->prepare( $sql, $sql_params );
+		}
 
 		$action_ids = $wpdb->get_col( $sql );
 
