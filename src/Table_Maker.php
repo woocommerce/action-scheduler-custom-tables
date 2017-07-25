@@ -22,7 +22,7 @@ abstract class Table_Maker {
 	/**
 	 * @var array Names of tables that will be registered by this class
 	 */
-	protected $tables         = [];
+	protected $tables = [];
 
 	/**
 	 * Register tables with WordPress, and create them if needed

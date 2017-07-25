@@ -13,6 +13,11 @@ class Batch_Fetcher {
 		$this->store = $source_store;
 	}
 
+	/**
+	 * @param int $count The number of actions to retrieve
+	 *
+	 * @return int[] A list of action IDs
+	 */
 	public function fetch( $count = 10 ) {
 		foreach ( $this->get_query_strategies( $count ) as $query ) {
 			$action_ids = $this->store->query_actions( $query );
@@ -27,11 +32,11 @@ class Batch_Fetcher {
 	private function get_query_strategies( $count ) {
 		$now  = as_get_datetime_object();
 		$args = [
-			'date'         => $now,
-			'per_page'     => $count,
-			'offset'       => 0,
-			'orderby'      => 'date',
-			'order'        => 'ASC',
+			'date'     => $now,
+			'per_page' => $count,
+			'offset'   => 0,
+			'orderby'  => 'date',
+			'order'    => 'ASC',
 		];
 
 		$priorities = [

@@ -19,6 +19,7 @@ class Action_Migrator {
 		if ( ! $action->get_schedule()->next() ) {
 			// we have a null schedule (probably the action didn't exist)
 			do_action( 'action_scheduler_no_action_to_migrate', $source_action_id, $this->source, $this->destination );
+
 			return 0;
 		}
 

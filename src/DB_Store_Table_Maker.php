@@ -4,6 +4,7 @@ namespace Action_Scheduler\Custom_Tables;
 
 /**
  * Class DB_Store_Table_Maker
+ *
  * @codeCoverageIgnore
  *
  * Creates custom tables for storing scheduled actions
@@ -18,15 +19,15 @@ class DB_Store_Table_Maker extends Table_Maker {
 	public function __construct() {
 		$this->tables = [
 			self::ACTIONS_TABLE,
-		  self::CLAIMS_TABLE,
-		  self::GROUPS_TABLE,
+			self::CLAIMS_TABLE,
+			self::GROUPS_TABLE,
 		];
 	}
 
 	protected function get_table_definition( $table ) {
 		global $wpdb;
-		$table_name = $wpdb->$table;
-		$charset_collate = $wpdb->get_charset_collate();
+		$table_name       = $wpdb->$table;
+		$charset_collate  = $wpdb->get_charset_collate();
 		$max_index_length = 191; // @see wp_get_db_schema()
 		switch ( $table ) {
 

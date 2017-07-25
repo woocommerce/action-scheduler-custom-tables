@@ -4,6 +4,7 @@
 namespace Action_Scheduler\Custom_Tables;
 
 
+use Action_Scheduler\Custom_Tables\Migration\Migration_Config;
 use Action_Scheduler\Custom_Tables\Migration\Migration_Runner;
 use ActionScheduler_Action;
 use ActionScheduler_FinishedAction;
@@ -26,10 +27,18 @@ class Migration_Runner_Test extends UnitTestCase {
 		$destination_store  = new DB_Store();
 		$source_logger      = new CommentLogger();
 		$destination_logger = new DB_Logger();
-		$due                = [];
-		$future             = [];
-		$complete           = [];
-		$runner             = new Migration_Runner( $source_store, $destination_store, $source_logger, $destination_logger );
+
+		$config = new Migration_Config();
+		$config->set_source_store( $source_store );
+		$config->set_source_logger( $source_logger );
+		$config->set_destination_store( $destination_store );
+		$config->set_destination_logger( $destination_logger );
+
+		$runner = new Migration_Runner( $config );
+
+		$due      = [];
+		$future   = [];
+		$complete = [];
 
 		for ( $i = 0; $i < 5; $i ++ ) {
 			$time     = as_get_datetime_object( $i + 1 . ' minutes' );

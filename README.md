@@ -5,3 +5,14 @@ Improved scalability for the Action Scheduler library using custom tables.
 ## Overview
 
 Action Scheduler uses WordPress posts to store scheduled actions in the existing database tables. This plugin hooks into Action Scheduler to set up separate tables as a datastore, improving performance and scalability.
+
+## Migration
+
+### WP CLI
+
+To migrate actions in bulk using WP-CLI, run the following command:
+
+```
+wp action-scheduler custom-tables migrate [--batch=<batch>] [--dry-run]
+```
+

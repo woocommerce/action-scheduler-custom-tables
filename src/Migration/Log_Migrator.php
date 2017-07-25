@@ -11,7 +11,7 @@ class Log_Migrator {
 	private $destination;
 
 	public function __construct( ActionScheduler_Logger $source_logger, ActionScheduler_Logger $destination_Logger ) {
-		$this->source = $source_logger;
+		$this->source      = $source_logger;
 		$this->destination = $destination_Logger;
 	}
 
