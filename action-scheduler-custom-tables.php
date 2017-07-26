@@ -27,6 +27,24 @@ function register_cli_command() {
 	}
 }
 
+function schedule_migration() {
+	if ( ! apply_filters( 'action_scheduler_custom_tables_do_background_migration', true ) ) {
+		return;
+	}
+
+	$scheduler = new Migration\Migration_Scheduler();
+	if ( $scheduler->is_migration_complete() ) {
+		return;
+	}
+	$scheduler->hook();
+
+	if ( $scheduler->is_migration_scheduled() ) {
+		return;
+	}
+	$scheduler->schedule_migration();
+}
+
 add_filter( 'action_scheduler_store_class', __NAMESPACE__ . '\set_store_class', 10, 1 );
 add_filter( 'action_scheduler_logger_class', __NAMESPACE__ . '\set_logger_class', 10, 1 );
 add_action( 'plugins_loaded', __NAMESPACE__ . '\register_cli_command', 10, 0 );
+add_action( 'shutdown', __NAMESPACE__ . '\schedule_migration', 0, 0 );
