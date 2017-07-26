@@ -13,7 +13,12 @@ namespace Action_Scheduler\Custom_Tables;
 require_once( __DIR__ . '/vendor/autoload.php' );
 
 function set_store_class( $class ) {
-	return DB_Store::class;
+	$scheduler = new Migration\Migration_Scheduler();
+	if ( $scheduler->is_migration_complete() ) {
+		return DB_Store::class;
+	} else {
+		return Hybrid_Store::class;
+	}
 }
 
 function set_logger_class( $class ) {
