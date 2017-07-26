@@ -32,9 +32,15 @@ class Migration_Runner {
 	public function run( $batch_size = 10 ) {
 		$batch = $this->batch_fetcher->fetch( $batch_size );
 
-		do_action( 'action_scheduler_migration_batch_starting', $batch );
+		$this->migrate_actions( $batch );
 
-		foreach ( $batch as $source_action_id ) {
+		return count( $batch );
+	}
+
+	public function migrate_actions( array $action_ids ) {
+		do_action( 'action_scheduler_migration_batch_starting', $action_ids );
+
+		foreach ( $action_ids as $source_action_id ) {
 			$destination_action_id = $this->action_migrator->migrate( $source_action_id );
 			if ( $destination_action_id ) {
 				$this->log_migrator->migrate( $source_action_id, $destination_action_id );
@@ -48,8 +54,6 @@ class Migration_Runner {
 			}
 		}
 
-		do_action( 'action_scheduler_migration_batch_complete', $batch );
-
-		return count( $batch );
+		do_action( 'action_scheduler_migration_batch_complete', $action_ids );
 	}
 }
