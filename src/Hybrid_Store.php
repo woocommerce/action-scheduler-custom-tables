@@ -50,10 +50,10 @@ class Hybrid_Store extends Store {
 	 * @codeCoverageIgnore
 	 */
 	public function init() {
-		add_action( 'action_scheduler_custom_table_created', [ $this, 'set_autoincrement' ], 10, 2 );
+		add_action( 'action_scheduler/custom_tables/created_table', [ $this, 'set_autoincrement' ], 10, 2 );
 		$this->primary_store->init();
 		$this->secondary_store->init();
-		remove_action( 'action_scheduler_custom_table_created', [ $this, 'set_autoincrement' ], 10 );
+		remove_action( 'action_scheduler/custom_tables/created_table', [ $this, 'set_autoincrement' ], 10 );
 	}
 
 	/**

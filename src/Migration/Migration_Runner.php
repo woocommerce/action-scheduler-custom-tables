@@ -38,7 +38,7 @@ class Migration_Runner {
 	}
 
 	public function migrate_actions( array $action_ids ) {
-		do_action( 'action_scheduler_migration_batch_starting', $action_ids );
+		do_action( 'action_scheduler/custom_tables/migration_batch_starting', $action_ids );
 
 		foreach ( $action_ids as $source_action_id ) {
 			$destination_action_id = $this->action_migrator->migrate( $source_action_id );
@@ -54,6 +54,6 @@ class Migration_Runner {
 			}
 		}
 
-		do_action( 'action_scheduler_migration_batch_complete', $action_ids );
+		do_action( 'action_scheduler/custom_tables/migration_batch_complete', $action_ids );
 	}
 }

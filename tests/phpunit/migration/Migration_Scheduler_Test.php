@@ -49,7 +49,7 @@ class Migration_Scheduler_Test extends UnitTestCase {
 		$return_5 = function () {
 			return 5;
 		};
-		add_filter( 'action_scheduler_custom_tables_migration_batch_size', $return_5 );
+		add_filter( 'action_scheduler/custom_tables/migration_batch_size', $return_5 );
 
 		for ( $i = 0; $i < 10; $i ++ ) {
 			$time     = as_get_datetime_object( $i + 1 . ' minutes' );
@@ -77,7 +77,7 @@ class Migration_Scheduler_Test extends UnitTestCase {
 
 		$scheduler->unhook();
 
-		remove_filter( 'action_scheduler_custom_tables_migration_batch_size', $return_5 );
+		remove_filter( 'action_scheduler/custom_tables/migration_batch_size', $return_5 );
 	}
 
 	public function test_scheduler_marks_itself_complete() {

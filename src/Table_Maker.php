@@ -98,7 +98,7 @@ abstract class Table_Maker {
 			$updated = dbDelta( $definition );
 			foreach ( $updated as $updated_table => $update_description ) {
 				if ( strpos( $update_description, 'Created table' ) === 0 ) {
-					do_action( 'action_scheduler_custom_table_created', $updated_table, $table );
+					do_action( 'action_scheduler/custom_tables/created_table', $updated_table, $table );
 				}
 			}
 		}

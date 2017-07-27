@@ -52,7 +52,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function schedule_migration() {
-		if ( ! apply_filters( 'action_scheduler_custom_tables_do_background_migration', true ) ) {
+		if ( ! apply_filters( 'action_scheduler/custom_tables/do_background_migration', true ) ) {
 			return;
 		}
 
@@ -80,7 +80,7 @@ class Plugin {
 		$config->set_destination_store( new DB_Store() );
 		$config->set_destination_logger( new DB_Logger() );
 
-		return apply_filters( 'action_scheduler_custom_tables_migration_config', $config );
+		return apply_filters( 'action_scheduler/custom_tables/migration_config', $config );
 	}
 
 	private function hook() {

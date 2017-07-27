@@ -18,7 +18,7 @@ class Action_Migrator {
 
 		if ( ! $action->get_schedule()->next() ) {
 			// we have a null schedule (probably the action didn't exist)
-			do_action( 'action_scheduler_no_action_to_migrate', $source_action_id, $this->source, $this->destination );
+			do_action( 'action_scheduler/custom_tables/no_action_to_migrate', $source_action_id, $this->source, $this->destination );
 
 			return 0;
 		}
@@ -26,7 +26,7 @@ class Action_Migrator {
 		try {
 			$destination_action_id = $this->destination->save_action( $action );
 		} catch ( \Exception $e ) {
-			do_action( 'action_scheduler_migrate_action_failed', $source_action_id, $this->source, $this->destination );
+			do_action( 'action_scheduler/custom_tables/migrate_action_failed', $source_action_id, $this->source, $this->destination );
 
 			return 0; // could not save the action in the new store
 		}
@@ -34,13 +34,13 @@ class Action_Migrator {
 		try {
 			$this->source->delete_action( $source_action_id );
 
-			do_action( 'action_scheduler_migrated_action', $source_action_id, $destination_action_id, $this->source, $this->destination );
+			do_action( 'action_scheduler/custom_tables/migrated_action', $source_action_id, $destination_action_id, $this->source, $this->destination );
 
 			return $destination_action_id;
 		} catch ( \Exception $e ) {
 			// could not delete from the old store
-			do_action( 'action_scheduler_migrate_action_incomplete', $source_action_id, $destination_action_id, $this->source, $this->destination );
-			do_action( 'action_scheduler_migrated_action', $source_action_id, $destination_action_id, $this->source, $this->destination );
+			do_action( 'action_scheduler/custom_tables/migrate_action_incomplete', $source_action_id, $destination_action_id, $this->source, $this->destination );
+			do_action( 'action_scheduler/custom_tables/migrated_action', $source_action_id, $destination_action_id, $this->source, $this->destination );
 
 			return $destination_action_id;
 		}

@@ -97,25 +97,25 @@ class Migration_Command extends WP_CLI_Command {
 	}
 
 	private function init_logging() {
-		add_action( 'action_scheduler_migrate_action_dry_run', function ( $action_id ) {
+		add_action( 'action_scheduler/custom_tables/migrate_action_dry_run', function ( $action_id ) {
 			WP_CLI::debug( sprintf( 'Dry-run: migrated action %d', $action_id ) );
 		}, 10, 1 );
-		add_action( 'action_scheduler_no_action_to_migrate', function ( $action_id ) {
+		add_action( 'action_scheduler/custom_tables/no_action_to_migrate', function ( $action_id ) {
 			WP_CLI::debug( sprintf( 'No action found to migrate for ID %d', $action_id ) );
 		}, 10, 1 );
-		add_action( 'action_scheduler_migrate_action_failed', function ( $action_id ) {
+		add_action( 'action_scheduler/custom_tables/migrate_action_failed', function ( $action_id ) {
 			WP_CLI::warning( sprintf( 'Failed migrating action with ID %d', $action_id ) );
 		}, 10, 1 );
-		add_action( 'action_scheduler_migrate_action_incomplete', function ( $source_id, $destination_id ) {
+		add_action( 'action_scheduler/custom_tables/migrate_action_incomplete', function ( $source_id, $destination_id ) {
 			WP_CLI::warning( sprintf( 'Unable to remove source action with ID %d after migrating to new ID %d', $source_id, $destination_id ) );
 		}, 10, 2 );
-		add_action( 'action_scheduler_migrated_action', function ( $source_id, $destination_id ) {
+		add_action( 'action_scheduler/custom_tables/migrated_action', function ( $source_id, $destination_id ) {
 			WP_CLI::debug( sprintf( 'Migrated source action with ID %d to new store with ID %d', $source_id, $destination_id ) );
 		}, 10, 2 );
-		add_action( 'action_scheduler_migration_batch_starting', function ( $batch ) {
+		add_action( 'action_scheduler/custom_tables/migration_batch_starting', function ( $batch ) {
 			WP_CLI::debug( 'Beginning migration of batch: ' . print_r( $batch, true ) );
 		}, 10, 1 );
-		add_action( 'action_scheduler_migration_batch_complete', function ( $batch ) {
+		add_action( 'action_scheduler/custom_tables/migration_batch_complete', function ( $batch ) {
 			WP_CLI::log( sprintf( 'Completed migration of %d actions', count( $batch ) ) );
 		}, 10, 1 );
 	}
