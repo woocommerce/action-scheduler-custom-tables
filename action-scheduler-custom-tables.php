@@ -49,6 +49,16 @@ function schedule_migration() {
 	$scheduler->schedule_migration();
 }
 
+function get_migration_config_object() {
+	$config = new Migration\Migration_Config();
+	$config->set_source_store( new \ActionScheduler_wpPostStore() );
+	$config->set_source_logger( new \ActionScheduler_wpCommentLogger() );
+	$config->set_destination_store( new DB_Store() );
+	$config->set_destination_logger( new DB_Logger() );
+
+	return apply_filters( 'action_scheduler_custom_tables_migration_config', $config );
+}
+
 add_filter( 'action_scheduler_store_class', __NAMESPACE__ . '\set_store_class', 10, 1 );
 add_filter( 'action_scheduler_logger_class', __NAMESPACE__ . '\set_logger_class', 10, 1 );
 add_action( 'plugins_loaded', __NAMESPACE__ . '\register_cli_command', 10, 0 );

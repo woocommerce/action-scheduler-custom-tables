@@ -6,6 +6,7 @@ namespace Action_Scheduler\Custom_Tables\Migration;
 
 use Action_Scheduler\Custom_Tables\DB_Logger;
 use Action_Scheduler\Custom_Tables\DB_Store;
+use function Action_Scheduler\Custom_Tables\get_migration_config_object;
 
 class Migration_Scheduler {
 	const STATUS_FLAG     = 'action_schedule_custom_table_migration_status';
@@ -100,22 +101,9 @@ class Migration_Scheduler {
 	 * @return Migration_Runner
 	 */
 	private function get_migration_runner() {
-		$config = $this->get_migration_config();
+		$config = get_migration_config_object();
 
 		return new Migration_Runner( $config );
-	}
-
-	/**
-	 * @return Migration_Config
-	 */
-	private function get_migration_config() {
-		$config = new Migration_Config();
-		$config->set_source_store( new \ActionScheduler_wpPostStore() );
-		$config->set_source_logger( new \ActionScheduler_wpCommentLogger() );
-		$config->set_destination_store( new DB_Store() );
-		$config->set_destination_logger( new DB_Logger() );
-
-		return apply_filters( 'action_scheduler_custom_tables_migration_config', $config );
 	}
 
 }

@@ -95,7 +95,12 @@ abstract class Table_Maker {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		$definition = $this->get_table_definition( $table );
 		if ( $definition ) {
-			dbDelta( $definition );
+			$updated = dbDelta( $definition );
+			foreach ( $updated as $updated_table => $update_description ) {
+				if ( strpos( $update_description, 'Created table' ) === 0 ) {
+					do_action( 'action_scheduler_custom_table_created', $updated_table, $table );
+				}
+			}
 		}
 	}
 

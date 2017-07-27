@@ -3,14 +3,20 @@
 
 namespace Action_Scheduler\Custom_Tables\WP_CLI;
 
-use Action_Scheduler\Custom_Tables\DB_Logger;
-use Action_Scheduler\Custom_Tables\DB_Store;
+use function Action_Scheduler\Custom_Tables\get_migration_config_object;
 use Action_Scheduler\Custom_Tables\Migration\Migration_Config;
 use Action_Scheduler\Custom_Tables\Migration\Migration_Runner;
 use Action_Scheduler\Custom_Tables\Migration\Migration_Scheduler;
 use WP_CLI;
 use WP_CLI_Command;
 
+/**
+ * Class Migration_Command
+ *
+ * @package Action_Scheduler\Custom_Tables\WP_CLI
+ *
+ * @codeCoverageIgnore
+ */
 class Migration_Command extends WP_CLI_Command {
 	private $total_processed = 0;
 
@@ -25,14 +31,6 @@ class Migration_Command extends WP_CLI_Command {
 		WP_CLI::add_command( 'action-scheduler custom-tables migrate', [ $this, 'migrate' ], [
 			'shortdesc' => 'Migrates actions to the custom tables store',
 			'synopsis'  => [
-				[
-					'type'        => 'assoc',
-					'name'        => 'source',
-					'optional'    => true,
-					'default'     => 'default',
-					'description' => 'The store to migrate from. Currently only the default option can be handled.',
-					'options'     => [ 'default' ],
-				],
 				[
 					'type'        => 'assoc',
 					'name'        => 'batch',
@@ -89,51 +87,13 @@ class Migration_Command extends WP_CLI_Command {
 	 */
 	private function get_migration_config( $args ) {
 		$args = wp_parse_args( $args, [
-			'source'  => 'default',
 			'dry-run' => false,
 		] );
 
-		$source_store       = $this->get_source_store( $args[ 'source' ] );
-		$source_logger      = $this->get_source_logger( $args[ 'source' ] );
-		$destination_store  = new DB_Store();
-		$destination_logger = new DB_Logger();
-
-		$config = new Migration_Config();
-		$config->set_source_store( $source_store );
-		$config->set_source_logger( $source_logger );
-		$config->set_destination_store( $destination_store );
-		$config->set_destination_logger( $destination_logger );
+		$config = get_migration_config_object();
 		$config->set_dry_run( ! empty( $args[ 'dry-run' ] ) );
 
-		return apply_filters( 'action_scheduler_custom_tables_migration_config', $config );
-	}
-
-	/**
-	 * @param string $source
-	 *
-	 * @return \ActionScheduler_wpPostStore
-	 */
-	private function get_source_store( $source ) {
-		switch ( $source ) {
-			default:
-				$store = new \ActionScheduler_wpPostStore();
-		}
-
-		return apply_filters( 'action_scheduler_migration_source_store', $store, $source );
-	}
-
-	/**
-	 * @param string $source
-	 *
-	 * @return \ActionScheduler_wpCommentLogger
-	 */
-	private function get_source_logger( $source ) {
-		switch ( $source ) {
-			default:
-				$logger = new \ActionScheduler_wpCommentLogger();
-		}
-
-		return apply_filters( 'action_scheduler_migration_source_logger', $logger, $source );
+		return $config;
 	}
 
 	private function init_logging() {

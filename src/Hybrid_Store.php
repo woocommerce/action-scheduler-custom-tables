@@ -17,11 +17,30 @@ use DateTime;
  * A wrapper around multiple stores that fetches data from both
  */
 class Hybrid_Store extends Store {
+	const DEMARKATION_OPTION = 'action_scheduler_hybrid_store_demarkation';
+
 	private $primary_store;
 	private $secondary_store;
 	private $migration_runner;
 
-	public function __construct( Migration_Config $config ) {
+	/**
+	 * @var int The dividing line between IDs of actions created
+	 *          by the primary and secondary stores.
+	 *
+	 * Methods that accept an action ID will compare the ID against
+	 * this to determine which store will contain that ID. In almost
+	 * all cases, the ID should come from the primary store, but if
+	 * client code is bypassing the API functions and fetching IDs
+	 * from elsewhere, then there is a chance that an unmigrated ID
+	 * might be requested.
+	 */
+	private $demarkation_id = 0;
+
+	public function __construct( Migration_Config $config = null ) {
+		$this->demarkation_id = (int) get_option( self::DEMARKATION_OPTION, 0 );
+		if ( empty( $config ) ) {
+			$config = get_migration_config_object();
+		}
 		$this->primary_store    = $config->get_destination_store();
 		$this->secondary_store  = $config->get_source_store();
 		$this->migration_runner = new Migration_Runner( $config );
@@ -31,8 +50,63 @@ class Hybrid_Store extends Store {
 	 * @codeCoverageIgnore
 	 */
 	public function init() {
+		add_action( 'action_scheduler_custom_table_created', [ $this, 'set_autoincrement' ], 10, 2 );
 		$this->primary_store->init();
 		$this->secondary_store->init();
+		remove_action( 'action_scheduler_custom_table_created', [ $this, 'set_autoincrement' ], 10 );
+	}
+
+	/**
+	 * When the actions table is created, set its autoincrement
+	 * value to be one higher than the posts table to ensure that
+	 * there are no ID collisions.
+	 *
+	 * @param string $table_name
+	 * @param string $table_suffix
+	 *
+	 * @return void
+	 * @codeCoverageIgnore
+	 */
+	public function set_autoincrement( $table_name, $table_suffix ) {
+		if ( DB_Store_Table_Maker::ACTIONS_TABLE === $table_suffix ) {
+			if ( empty( $this->demarkation_id ) ) {
+				$this->demarkation_id = $this->set_demarkation_id();
+			}
+			/** @var \wpdb $wpdb */
+			global $wpdb;
+			$wpdb->insert(
+				$wpdb->{DB_Store_Table_Maker::ACTIONS_TABLE},
+				[
+					'action_id' => $this->demarkation_id,
+					'hook'      => '',
+					'status'    => '',
+				]
+			);
+			$wpdb->delete(
+				$wpdb->{DB_Store_Table_Maker::ACTIONS_TABLE},
+				[ 'action_id' => $this->demarkation_id ]
+			);
+		}
+	}
+
+	/**
+	 * @param int $id The ID to set as the demarkation point between the two stores
+	 *                Leave null to use the next ID from the WP posts table.
+	 *
+	 * @return int The new ID.
+	 *
+	 * @codeCoverageIgnore
+	 */
+	private function set_demarkation_id( $id = null ) {
+		if ( empty( $id ) ) {
+			/** @var \wpdb $wpdb */
+			global $wpdb;
+			$id = (int) $wpdb->get_var( "SELECT MAX(ID) FROM $wpdb->posts" );
+			$id ++;
+		}
+		update_option( self::DEMARKATION_OPTION, $id );
+
+		return $id;
 	}
 
 	/**
@@ -105,20 +179,66 @@ class Hybrid_Store extends Store {
 	}
 
 	public function fetch_action( $action_id ) {
-		return $this->primary_store->fetch_action( $action_id );
+		if ( $action_id < $this->demarkation_id ) {
+			return $this->secondary_store->fetch_action( $action_id );
+		} else {
+			return $this->primary_store->fetch_action( $action_id );
+		}
 	}
 
 	public function cancel_action( $action_id ) {
-		$this->primary_store->cancel_action( $action_id );
+		if ( $action_id < $this->demarkation_id ) {
+			$this->secondary_store->cancel_action( $action_id );
+		} else {
+			$this->primary_store->cancel_action( $action_id );
+		}
 	}
 
 	public function delete_action( $action_id ) {
-		$this->primary_store->delete_action( $action_id );
+		if ( $action_id < $this->demarkation_id ) {
+			$this->secondary_store->delete_action( $action_id );
+		} else {
+			$this->primary_store->delete_action( $action_id );
+		}
 	}
 
 	public function get_date( $action_id ) {
-		return $this->primary_store->get_date( $action_id );
+		if ( $action_id < $this->demarkation_id ) {
+			return $this->secondary_store->get_date( $action_id );
+		} else {
+			return $this->primary_store->get_date( $action_id );
+		}
 	}
+
+	public function mark_failure( $action_id ) {
+		if ( $action_id < $this->demarkation_id ) {
+			$this->secondary_store->mark_failure( $action_id );
+		} else {
+			$this->primary_store->mark_failure( $action_id );
+		}
+	}
+
+	public function log_execution( $action_id ) {
+		if ( $action_id < $this->demarkation_id ) {
+			$this->secondary_store->log_execution( $action_id );
+		} else {
+			$this->primary_store->log_execution( $action_id );
+		}
+	}
+
+	public function mark_complete( $action_id ) {
+		if ( $action_id < $this->demarkation_id ) {
+			$this->secondary_store->mark_complete( $action_id );
+		} else {
+			$this->primary_store->mark_complete( $action_id );
+		}
+	}
+
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * All claim-related functions should operate solely
+	 * on the primary store.
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	public function get_claim_count() {
 		return $this->primary_store->get_claim_count();
@@ -130,18 +250,6 @@ class Hybrid_Store extends Store {
 
 	public function unclaim_action( $action_id ) {
 		$this->primary_store->unclaim_action( $action_id );
-	}
-
-	public function mark_failure( $action_id ) {
-		$this->primary_store->mark_failure( $action_id );
-	}
-
-	public function log_execution( $action_id ) {
-		$this->primary_store->log_execution( $action_id );
-	}
-
-	public function mark_complete( $action_id ) {
-		$this->primary_store->mark_complete( $action_id );
 	}
 
 	public function find_actions_by_claim_id( $claim_id ) {
