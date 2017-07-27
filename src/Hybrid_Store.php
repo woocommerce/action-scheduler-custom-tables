@@ -39,7 +39,7 @@ class Hybrid_Store extends Store {
 	public function __construct( Migration_Config $config = null ) {
 		$this->demarkation_id = (int) get_option( self::DEMARKATION_OPTION, 0 );
 		if ( empty( $config ) ) {
-			$config = get_migration_config_object();
+			$config = Plugin::instance()->get_migration_config_object();
 		}
 		$this->primary_store    = $config->get_destination_store();
 		$this->secondary_store  = $config->get_source_store();

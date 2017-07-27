@@ -3,10 +3,10 @@
 
 namespace Action_Scheduler\Custom_Tables\WP_CLI;
 
-use function Action_Scheduler\Custom_Tables\get_migration_config_object;
 use Action_Scheduler\Custom_Tables\Migration\Migration_Config;
 use Action_Scheduler\Custom_Tables\Migration\Migration_Runner;
 use Action_Scheduler\Custom_Tables\Migration\Migration_Scheduler;
+use Action_Scheduler\Custom_Tables\Plugin;
 use WP_CLI;
 use WP_CLI_Command;
 
@@ -90,7 +90,7 @@ class Migration_Command extends WP_CLI_Command {
 			'dry-run' => false,
 		] );
 
-		$config = get_migration_config_object();
+		$config = Plugin::instance()->get_migration_config_object();
 		$config->set_dry_run( ! empty( $args[ 'dry-run' ] ) );
 
 		return $config;

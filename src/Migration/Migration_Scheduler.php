@@ -4,9 +4,7 @@
 namespace Action_Scheduler\Custom_Tables\Migration;
 
 
-use Action_Scheduler\Custom_Tables\DB_Logger;
-use Action_Scheduler\Custom_Tables\DB_Store;
-use function Action_Scheduler\Custom_Tables\get_migration_config_object;
+use Action_Scheduler\Custom_Tables\Plugin;
 
 class Migration_Scheduler {
 	const STATUS_FLAG     = 'action_schedule_custom_table_migration_status';
@@ -101,7 +99,7 @@ class Migration_Scheduler {
 	 * @return Migration_Runner
 	 */
 	private function get_migration_runner() {
-		$config = get_migration_config_object();
+		$config = Plugin::instance()->get_migration_config_object();
 
 		return new Migration_Runner( $config );
 	}
