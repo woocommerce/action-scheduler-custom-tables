@@ -19,7 +19,11 @@ class Action_Migrator {
 		if ( ! $action->get_schedule()->next() ) {
 			// we have a null schedule (probably the action didn't exist or is missing meta)
 			// make sure it's deleted, then move on
-			$this->source->delete_action( $source_action_id );
+			try {
+				$this->source->delete_action( $source_action_id );
+			} catch ( \Exception $e ) {
+				// nothing to do, it didn't exist in the first place
+			}
 			do_action( 'action_scheduler/custom_tables/no_action_to_migrate', $source_action_id, $this->source, $this->destination );
 
 			return 0;
