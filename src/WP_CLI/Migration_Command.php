@@ -71,9 +71,11 @@ class Migration_Command extends WP_CLI_Command {
 			$this->total_processed += $actions_processed;
 		} while ( $actions_processed > 0 );
 
-		// let the scheduler know that there's nothing left to do
-		$scheduler = new Migration_Scheduler();
-		$scheduler->mark_complete();
+		if ( ! $config->get_dry_run() ) {
+			// let the scheduler know that there's nothing left to do
+			$scheduler = new Migration_Scheduler();
+			$scheduler->mark_complete();
+		}
 
 		WP_CLI::success( sprintf( '%s complete. %d actions processed.', $config->get_dry_run() ? 'Dry run' : 'Migration', $this->total_processed ) );
 	}
