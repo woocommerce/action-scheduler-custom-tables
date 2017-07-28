@@ -30,10 +30,7 @@
 	</groups>
 	<filter>
 		<whitelist processsUncoveredFilesFromWhitelist="true">
-			<directory suffix=".php">..</directory>
-			<exclude>
-				<directory>.</directory>
-			</exclude>
+			<directory suffix=".php">../src</directory>
 		</whitelist>
 	</filter>
 </phpunit>

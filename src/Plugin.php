@@ -3,7 +3,18 @@
 
 namespace Action_Scheduler\Custom_Tables;
 
-
+/**
+ * Class Plugin
+ *
+ * The main plugin/initialization class for the
+ * Action Scheduler Custom Tables plugin.
+ *
+ * Responsible for hooking everything up with WordPress.
+ *
+ * @package Action_Scheduler\Custom_Tables
+ *
+ * @codeCoverageIgnore
+ */
 class Plugin {
 	private static $instance;
 
