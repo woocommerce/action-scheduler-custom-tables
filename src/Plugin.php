@@ -94,11 +94,26 @@ class Plugin {
 		return apply_filters( 'action_scheduler/custom_tables/migration_config', $config );
 	}
 
+	public function hook_admin_notices() {
+		$scheduler = new Migration\Migration_Scheduler();
+		if ( $scheduler->is_migration_complete() ) {
+			return;
+		}
+		add_action( 'admin_notices', [ $this, 'display_migration_notice' ], 10, 0 );
+	}
+
+	public function display_migration_notice() {
+		printf( '<div class="notice notice-warning"><p>%s</p></div>', __( 'Migration in progress. The list of scheduled actions may be incomplete.' ) );
+	}
+
 	private function hook() {
 		add_filter( 'action_scheduler_store_class', [ $this, 'set_store_class' ], 10, 1 );
 		add_filter( 'action_scheduler_logger_class', [ $this, 'set_logger_class' ], 10, 1 );
 		add_action( 'plugins_loaded', [ $this, 'register_cli_command' ], 10, 0 );
 		add_action( 'shutdown', [ $this, 'schedule_migration' ], 0, 0 );
+
+		// TODO: add this to the correct load-* hook once the admin page exists
+		add_action( 'load-action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
 	}
 
 	public static function init() {
