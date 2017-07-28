@@ -4,6 +4,7 @@ namespace Action_Scheduler\Custom_Tables;
 use ActionScheduler_Action;
 use ActionScheduler_IntervalSchedule;
 use ActionScheduler_SimpleSchedule;
+use ActionScheduler_Store;
 
 /**
  * Class DB_Store_Test
@@ -156,6 +157,22 @@ class DB_Store_Test extends UnitTestCase {
 		$new_action_id = $store->save_action( $action, $next );
 
 		$this->assertEquals( (int) ( $now->format( 'U' ) ) + HOUR_IN_SECONDS, $store->get_date( $new_action_id )->format( 'U' ) );
+	}
+
+	public function test_get_status() {
+		$time = as_get_datetime_object('-10 minutes');
+		$schedule = new ActionScheduler_IntervalSchedule($time, HOUR_IN_SECONDS);
+		$action = new ActionScheduler_Action('my_hook', array(), $schedule);
+		$store = new DB_Store();
+		$action_id = $store->save_action($action);
+
+		$this->assertEquals( ActionScheduler_Store::STATUS_PENDING, $store->get_status( $action_id ) );
+
+		$store->mark_complete( $action_id );
+		$this->assertEquals( ActionScheduler_Store::STATUS_COMPLETE, $store->get_status( $action_id ) );
+
+		$store->mark_failure( $action_id );
+		$this->assertEquals( ActionScheduler_Store::STATUS_FAILED, $store->get_status( $action_id ) );
 	}
 }
  

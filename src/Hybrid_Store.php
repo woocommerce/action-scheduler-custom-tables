@@ -234,6 +234,14 @@ class Hybrid_Store extends Store {
 		}
 	}
 
+	public function get_status( $action_id ) {
+		if ( $action_id < $this->demarkation_id ) {
+			return $this->secondary_store->get_status( $action_id );
+		} else {
+			return $this->primary_store->get_status( $action_id );
+		}
+	}
+
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * All claim-related functions should operate solely

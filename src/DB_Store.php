@@ -529,4 +529,22 @@ class DB_Store extends ActionScheduler_Store {
 			throw new \InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
 		}
 	}
+
+	public function get_status( $action_id ) {
+		/** @var \wpdb $wpdb */
+		global $wpdb;
+		$sql    = "SELECT status FROM {$wpdb->actionscheduler_actions} WHERE action_id=%d";
+		$sql    = $wpdb->prepare( $sql, $action_id );
+		$status = $wpdb->get_var( $sql );
+
+		if ( $status === null ) {
+			throw new \InvalidArgumentException( __( 'Invalid action ID. No status found.', 'action-scheduler' ) );
+		} elseif ( empty( $status ) ) {
+			throw new \RuntimeException( __( 'Unknown status found for action.', 'action-scheduler' ) );
+		} else {
+			return $status;
+		}
+	}
+
+
 }

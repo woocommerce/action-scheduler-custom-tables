@@ -16,9 +16,16 @@ class Action_Migrator {
 	public function migrate( $source_action_id ) {
 		$action = $this->source->fetch_action( $source_action_id );
 
-		if ( ! $action->get_schedule()->next() ) {
-			// we have a null schedule (probably the action didn't exist or is missing meta)
-			// make sure it's deleted, then move on
+		try {
+			$status = $this->source->get_status( $source_action_id );
+		} catch ( \Exception $e ) {
+			$status = '';
+		}
+
+		if ( empty( $status ) || ! $action->get_schedule()->next() ) {
+			// empty status means the action didn't exist
+			// null schedule means it's missing vital data
+			// delete it and move on
 			try {
 				$this->source->delete_action( $source_action_id );
 			} catch ( \Exception $e ) {
@@ -37,7 +44,11 @@ class Action_Migrator {
 			return 0; // could not save the action in the new store
 		}
 
+
 		try {
+			if ( $status == \ActionScheduler_Store::STATUS_FAILED ) {
+				$this->destination->mark_failure( $destination_action_id );
+			}
 			$this->source->delete_action( $source_action_id );
 
 			do_action( 'action_scheduler/custom_tables/migrated_action', $source_action_id, $destination_action_id, $this->source, $this->destination );
