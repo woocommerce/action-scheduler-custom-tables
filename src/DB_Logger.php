@@ -97,6 +97,7 @@ class DB_Logger extends \ActionScheduler_Logger {
 		add_action( 'action_scheduler_failed_action', [ $this, 'log_timed_out_action' ], 10, 2 );
 		add_action( 'action_scheduler_unexpected_shutdown', [ $this, 'log_unexpected_shutdown' ], 10, 2 );
 		add_action( 'action_scheduler_reset_action', [ $this, 'log_reset_action' ], 10, 1 );
+		add_action( 'action_scheduler_deleted_action', [ $this, 'clear_deleted_action_logs' ], 10, 1 );
 	}
 
 	public function log_stored_action( $action_id ) {
@@ -131,6 +132,12 @@ class DB_Logger extends \ActionScheduler_Logger {
 
 	public function log_reset_action( $action_id ) {
 		$this->log( $action_id, __( 'action reset', 'action_scheduler' ) );
+	}
+
+	public function clear_deleted_action_logs( $action_id ) {
+		/** @var \wpdb $wpdb */
+		global $wpdb;
+		$wpdb->delete( $wpdb->actionscheduler_logs, [ 'action_id' => $action_id, ], [ '%d' ] );
 	}
 
 }

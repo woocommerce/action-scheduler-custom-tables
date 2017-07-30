@@ -332,7 +332,6 @@ class DB_Store extends ActionScheduler_Store {
 			throw new \InvalidArgumentException( sprintf( __( 'Unidentified action %s', 'action-scheduler' ), $action_id ) );
 		}
 		do_action( 'action_scheduler_deleted_action', $action_id );
-		wp_delete_post( $action_id, true );
 	}
 
 	/**
@@ -407,7 +406,7 @@ class DB_Store extends ActionScheduler_Store {
 		$now  = as_get_datetime_object();
 		$date = is_null( $before_date ) ? $now : clone $before_date;
 
-		// can't use $wpdb->update() because of the <= condition, using post_modified to take advantage of indexes
+		// can't use $wpdb->update() because of the <= condition
 		$sql = "UPDATE {$wpdb->actionscheduler_actions} SET claim_id=%d, last_attempt_gmt=%s, last_attempt_local=%s WHERE claim_id = 0 AND scheduled_date_gmt <= %s AND status=%s ORDER BY attempts ASC, scheduled_date_gmt ASC LIMIT %d";
 
 		$sql = $wpdb->prepare( $sql, [

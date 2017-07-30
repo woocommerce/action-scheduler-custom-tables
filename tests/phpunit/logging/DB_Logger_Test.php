@@ -105,6 +105,22 @@ class DB_Logger_Test extends UnitTestCase {
 		$this->assertTrue( in_array( $expected, $logs ) );
 	}
 
+	public function test_deleted_action_cleanup() {
+		$time = as_get_datetime_object('-10 minutes');
+		$schedule = new \ActionScheduler_SimpleSchedule($time);
+		$action = new \ActionScheduler_Action('my_hook', array(), $schedule);
+		$store = new DB_Store();
+		$action_id = $store->save_action($action);
+
+		$logger = new DB_Logger();
+		$logs = $logger->get_logs( $action_id );
+		$this->assertNotEmpty( $logs );
+
+		$store->delete_action( $action_id );
+		$logs = $logger->get_logs( $action_id );
+		$this->assertEmpty( $logs );
+	}
+
 	public function _a_hook_callback_that_throws_an_exception() {
 		throw new \RuntimeException('Execution failed');
 	}
