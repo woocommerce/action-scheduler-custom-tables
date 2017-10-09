@@ -148,6 +148,21 @@ class Hybrid_Store extends Store {
 	}
 
 	/**
+	 * Similar method to query_actions() but returns the number of matching rows
+	 *
+	 * @param array $query
+	 * @return int
+	 */
+	public function query_actions_count( $query = [] ) {
+		$found_unmigrated_actions = $this->secondary_store->query_actions_count( $query );
+		if ( ! empty( $found_unmigrated_actions ) ) {
+			$this->migrate( $found_unmigrated_actions );
+		}
+
+		return $this->primary_store->query_actions_count( $query );
+	}
+
+	/**
 	 * If any actions would have been claimed by the secondary store,
 	 * migrate them immediately, then ask the primary store for the
 	 * canonical claim.

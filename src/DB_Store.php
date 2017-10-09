@@ -292,6 +292,90 @@ class DB_Store extends ActionScheduler_Store {
 		return array_map( 'intval', $action_ids );
 	}
 
+	/**
+	 * Similar method to query_actions() but returns the number of matching rows
+	 *
+	 * @param array $query
+	 * @return int
+	 */
+	public function query_actions_count( $query = [] ) {
+		$query = wp_parse_args( $query, [
+			'hook'             => '',
+			'args'             => null,
+			'date'             => null,
+			'date_compare'     => '<=',
+			'modified'         => null,
+			'modified_compare' => '<=',
+			'group'            => '',
+			'status'           => '',
+			'claimed'          => null,
+			'per_page'         => 5,
+			'offset'           => 0,
+			'orderby'          => 'date',
+			'order'            => 'ASC',
+		] );
+
+		/** @var \wpdb $wpdb */
+		global $wpdb;
+		$sql        = "SELECT count(a.action_id) FROM {$wpdb->actionscheduler_actions} a";
+		$sql_params = [];
+
+		$sql .= " LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id=a.group_id";
+		$sql .= " WHERE 1=1";
+
+		if ( ! empty( $query[ 'group' ] ) ) {
+			$sql          .= " AND g.slug=%s";
+			$sql_params[] = $query[ 'group' ];
+		}
+
+		if ( $query[ 'hook' ] ) {
+			$sql          .= " AND a.hook=%s";
+			$sql_params[] = $query[ 'hook' ];
+		}
+		if ( ! is_null( $query[ 'args' ] ) ) {
+			$sql          .= " AND a.args=%s";
+			$sql_params[] = json_encode( $query[ 'args' ] );
+		}
+
+		if ( $query[ 'status' ] ) {
+			$sql          .= " AND a.status=%s";
+			$sql_params[] = $query[ 'status' ];
+		}
+
+		if ( $query[ 'date' ] instanceof \DateTime ) {
+			$date = clone $query[ 'date' ];
+			$date->setTimezone( new \DateTimeZone( 'UTC' ) );
+			$date_string  = $date->format( 'Y-m-d H:i:s' );
+			$comparator   = $this->validate_sql_comparator( $query[ 'date_compare' ] );
+			$sql          .= " AND a.scheduled_date_gmt $comparator %s";
+			$sql_params[] = $date_string;
+		}
+
+		if ( $query[ 'modified' ] instanceof \DateTime ) {
+			$modified = clone $query[ 'modified' ];
+			$modified->setTimezone( new \DateTimeZone( 'UTC' ) );
+			$date_string  = $modified->format( 'Y-m-d H:i:s' );
+			$comparator   = $this->validate_sql_comparator( $query[ 'modified_compare' ] );
+			$sql          .= " AND a.last_attempt_gmt $comparator %s";
+			$sql_params[] = $date_string;
+		}
+
+		if ( $query[ 'claimed' ] === true ) {
+			$sql .= " AND a.claim_id != 0";
+		} elseif ( $query[ 'claimed' ] === false ) {
+			$sql .= " AND a.claim_id = 0";
+		} elseif ( ! is_null( $query[ 'claimed' ] ) ) {
+			$sql          .= " AND a.claim_id = %d";
+			$sql_params[] = $query[ 'claimed' ];
+		}
+
+		if ( ! empty( $sql_params ) ) {
+			$sql = $wpdb->prepare( $sql, $sql_params );
+		}
+
+		return $wpdb->get_var( $sql );
+	}
+
 	private function validate_sql_comparator( $comp ) {
 		if ( in_array( $comp, [ '!=', '>', '>=', '<', '<=', '=' ] ) ) {
 			return $comp;
