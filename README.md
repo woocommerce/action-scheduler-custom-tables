@@ -1,6 +1,8 @@
 # Action Scheduler Custom Tables [![Build Status](https://travis-ci.org/Prospress/action-scheduler-custom-tables.png?branch=master)](https://travis-ci.org/Prospress/action-scheduler-custom-tables) [![codecov](https://codecov.io/gh/Prospress/action-scheduler-custom-tables/branch/master/graph/badge.svg)](https://codecov.io/gh/Prospress/action-scheduler-custom-tables)
 
-Improved scalability for the Action Scheduler library using custom tables.
+Prototype of improved scalability for the Action Scheduler library using custom tables.
+
+**This plugin is beta software. Use only on staging and test sites for now.**
 
 ## Overview
 
