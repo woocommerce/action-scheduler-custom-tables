@@ -109,7 +109,7 @@ class Plugin {
 	}
 
 	public function display_migration_notice() {
-		printf( '<div class="notice notice-warning"><p>%s</p></div>', __( 'Migration in progress. The list of scheduled actions may be incomplete.' ) );
+		printf( '<div class="notice notice-warning"><p>%s</p></div>', __( 'Action Scheduler migration in progress. The list of scheduled actions may be incomplete.' ) );
 	}
 
 	private function hook() {
