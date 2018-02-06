@@ -112,8 +112,9 @@ class Plugin {
 		add_action( 'plugins_loaded', [ $this, 'register_cli_command' ], 10, 0 );
 		add_action( 'shutdown', [ $this, 'schedule_migration' ], 0, 0 );
 
-		// TODO: add this to the correct load-* hook once the admin page exists
-		add_action( 'load-action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
+		// Action Scheduler may be displayed as a Tools screen or WooCommerce > Status adminstration screen
+		add_action( 'load-tools_page_action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
+		add_action( 'load-woocommerce_page_wc-status', [ $this, 'hook_admin_notices' ], 10, 0 );
 	}
 
 	public static function init() {
