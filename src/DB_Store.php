@@ -295,14 +295,6 @@ class DB_Store extends ActionScheduler_Store {
 		return $sql;
 	}
 
-	private function validate_sql_comparator( $comp ) {
-		if ( in_array( $comp, [ '!=', '>', '>=', '<', '<=', '=' ] ) ) {
-			return $comp;
-		}
-
-		return '=';
-	}
-
 	/**
 	 * @param array $query
 	 * @param string $query_type Whether to select or count the results. Default, select.
