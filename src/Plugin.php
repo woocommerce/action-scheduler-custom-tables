@@ -63,12 +63,9 @@ class Plugin {
 	 * @return void
 	 */
 	public function schedule_migration() {
-		if ( ! apply_filters( 'action_scheduler/custom_tables/do_background_migration', true ) ) {
-			return;
-		}
 
 		$scheduler = new Migration\Migration_Scheduler();
-		if ( $scheduler->is_migration_complete() ) {
+		if ( false == $scheduler->do_background_migration() ) {
 			return;
 		}
 		$scheduler->hook();
