@@ -179,13 +179,15 @@ class DB_Store extends ActionScheduler_Store {
 		return $id;
 	}
 
-
 	/**
-	 * @param array $query
+	 * Returns the SQL statement to query (or count) actions.
 	 *
-	 * @return int[] The IDs of actions matching the query
+	 * @param array $query Filtering options
+	 * @param string $select_or_count  Whether the SQL should select and return the IDs or just the row count
+	 *
+	 * @return string SQL statement. The returned SQL is already properly escaped.
 	 */
-	public function query_actions( $query = [] ) {
+	protected function get_query_actions_sql( array $query, $select_or_count = 'select' ) {
 		$query = wp_parse_args( $query, [
 			'hook'             => '',
 			'args'             => null,
@@ -204,7 +206,8 @@ class DB_Store extends ActionScheduler_Store {
 
 		/** @var \wpdb $wpdb */
 		global $wpdb;
-		$sql        = "SELECT a.action_id FROM {$wpdb->actionscheduler_actions} a";
+		$sql  = ( 'count' === $select_or_count ) ? 'SELECT count(a.action_id)' : 'SELECT a.action_id ';
+		$sql .= "FROM {$wpdb->actionscheduler_actions} a";
 		$sql_params = [];
 
 		$sql .= " LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id=a.group_id";
@@ -256,40 +259,40 @@ class DB_Store extends ActionScheduler_Store {
 			$sql_params[] = $query[ 'claimed' ];
 		}
 
-		switch ( $query[ 'orderby' ] ) {
-			case 'hook':
-				$orderby = 'a.hook';
-				break;
-			case 'group':
-				$orderby = 'g.slug';
-				break;
-			case 'modified':
-				$orderby = 'a.last_attempt_gmt';
-				break;
-			case 'date':
-			default:
-				$orderby = 'a.scheduled_date_gmt';
-				break;
-		}
-		if ( strtoupper( $query[ 'order' ] ) == 'ASC' ) {
-			$order = 'ASC';
-		} else {
-			$order = 'DESC';
-		}
-		$sql .= " ORDER BY $orderby $order";
-		if ( $query[ 'per_page' ] > 0 ) {
-			$sql          .= " LIMIT %d, %d";
-			$sql_params[] = $query[ 'offset' ];
-			$sql_params[] = $query[ 'per_page' ];
+		if ( 'select' === $select_or_count ) {
+			switch ( $query[ 'orderby' ] ) {
+				case 'hook':
+					$orderby = 'a.hook';
+					break;
+				case 'group':
+					$orderby = 'g.slug';
+					break;
+				case 'modified':
+					$orderby = 'a.last_attempt_gmt';
+					break;
+				case 'date':
+				default:
+					$orderby = 'a.scheduled_date_gmt';
+					break;
+			}
+			if ( strtoupper( $query[ 'order' ] ) == 'ASC' ) {
+				$order = 'ASC';
+			} else {
+				$order = 'DESC';
+			}
+			$sql .= " ORDER BY $orderby $order";
+			if ( $query[ 'per_page' ] > 0 ) {
+				$sql          .= " LIMIT %d, %d";
+				$sql_params[] = $query[ 'offset' ];
+				$sql_params[] = $query[ 'per_page' ];
+			}
 		}
 
 		if ( ! empty( $sql_params ) ) {
 			$sql = $wpdb->prepare( $sql, $sql_params );
 		}
 
-		$action_ids = $wpdb->get_col( $sql );
-
-		return array_map( 'intval', $action_ids );
+		return $sql;
 	}
 
 	private function validate_sql_comparator( $comp ) {
@@ -300,6 +303,45 @@ class DB_Store extends ActionScheduler_Store {
 		return '=';
 	}
 
+	/**
+	 * @param array $query
+	 * @param string $query_type Whether to select or count the results. Default, select.
+	 *
+	 * @return int[] The IDs of actions matching the query
+	 */
+	public function query_actions( $query = [], $query_type = 'select' ) {
+		/** @var wpdb $wpdb */
+		global $wpdb;
+
+		$sql = $this->get_query_actions_sql( $query, $query_type );
+
+		return ( 'count' === $query_type ) ? $wpdb->get_var( $sql ) : $wpdb->get_col( $sql );
+	}
+
+	/**
+	 * Get a count of all actions in the store, grouped by status
+	 *
+	 * @return array Set of 'status' => int $count pairs for statuses with 1 or more actions of that status.
+	 */
+	public function action_counts() {
+		global $wpdb;
+
+		$sql  = "SELECT a.status, count(a.status) as 'count'";
+		$sql .= " FROM {$wpdb->actionscheduler_actions} a";
+		$sql .= " GROUP BY a.status";
+
+		$actions_count_by_status = array();
+		$action_stati_and_labels = $this->get_status_labels();
+
+		foreach ( $wpdb->get_results( $sql ) as $action_data ) {
+			// Ignore any actions with invalid status
+			if ( array_key_exists( $action_data->status, $action_stati_and_labels ) ) {
+				$actions_count_by_status[ $action_data->status ] = $action_data->count;
+			}
+		}
+
+		return $actions_count_by_status;
+	}
 
 	/**
 	 * @param string $action_id
@@ -438,6 +480,21 @@ class DB_Store extends ActionScheduler_Store {
 		return (int) $wpdb->get_var( $sql );
 	}
 
+	/**
+	 * Return an action's claim ID, as stored in the claim_id column
+	 *
+	 * @param string $action_id
+	 * @return mixed
+	 */
+	public function get_claim_id( $action_id ) {
+		/** @var \wpdb $wpdb */
+		global $wpdb;
+
+		$sql = "SELECT claim_id FROM {$wpdb->actionscheduler_actions} WHERE action_id=%d";
+		$sql = $wpdb->prepare( $sql, $action_id );
+
+		return (int) $wpdb->get_var( $sql );
+	}
 
 	/**
 	 * @param string $claim_id
