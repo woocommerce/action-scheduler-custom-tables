@@ -65,15 +65,24 @@ class Plugin {
 	public function schedule_migration() {
 
 		$scheduler = new Migration\Migration_Scheduler();
+		if ( false == $scheduler->do_background_migration() || $scheduler->is_migration_scheduled() ) {
+			return;
+		}
+		$scheduler->schedule_migration();
+	}
+
+	/**
+	 * Attach the callback to run the background migration process
+	 *
+	 * @return void
+	 */
+	public function hook_scheduled_migration() {
+
+		$scheduler = new Migration\Migration_Scheduler();
 		if ( false == $scheduler->do_background_migration() ) {
 			return;
 		}
 		$scheduler->hook();
-
-		if ( $scheduler->is_migration_scheduled() ) {
-			return;
-		}
-		$scheduler->schedule_migration();
 	}
 
 	/**
@@ -104,9 +113,11 @@ class Plugin {
 	}
 
 	private function hook() {
+
 		add_filter( 'action_scheduler_store_class', [ $this, 'set_store_class' ], 10, 1 );
 		add_filter( 'action_scheduler_logger_class', [ $this, 'set_logger_class' ], 10, 1 );
 		add_action( 'plugins_loaded', [ $this, 'register_cli_command' ], 10, 0 );
+		add_action( 'plugins_loaded', [ $this, 'hook_scheduled_migration' ], 1000, 0 );
 		add_action( 'shutdown', [ $this, 'schedule_migration' ], 0, 0 );
 
 		// Action Scheduler may be displayed as a Tools screen or WooCommerce > Status adminstration screen
