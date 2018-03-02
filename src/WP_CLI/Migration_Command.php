@@ -33,7 +33,7 @@ class Migration_Command extends WP_CLI_Command {
 			'synopsis'  => [
 				[
 					'type'        => 'assoc',
-					'name'        => 'batch',
+					'name'        => 'batch-size',
 					'optional'    => true,
 					'default'     => 100,
 					'description' => 'The number of actions to process in each batch',
@@ -64,7 +64,7 @@ class Migration_Command extends WP_CLI_Command {
 		$config = $this->get_migration_config( $assoc_args );
 
 		$runner     = new Migration_Runner( $config );
-		$batch_size = isset( $assoc_args[ 'batch' ] ) ? (int) $assoc_args[ 'batch' ] : 100;
+		$batch_size = isset( $assoc_args[ 'batch-size' ] ) ? (int) $assoc_args[ 'batch-size' ] : 100;
 
 		do {
 			$actions_processed     = $runner->run( $batch_size );
