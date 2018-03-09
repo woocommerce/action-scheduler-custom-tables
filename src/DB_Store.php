@@ -40,7 +40,15 @@ class DB_Store extends ActionScheduler_Store {
 		$table_maker->register_tables();
 	}
 
-
+	/**
+	 * Save an action in the database.
+	 *
+	 * @param ActionScheduler_Action $action
+	 * @param \DateTime              $date
+	 *
+	 * @return int|string
+	 * @throws \RuntimeException
+	 */
 	public function save_action( ActionScheduler_Action $action, \DateTime $date = null ) {
 		try {
 			/** @var \wpdb $wpdb */
@@ -57,6 +65,11 @@ class DB_Store extends ActionScheduler_Store {
 			$wpdb->insert( $wpdb->actionscheduler_actions, $data );
 			$action_id = $wpdb->insert_id;
 
+			/**
+			 * Run once an action has been stored in the DB.
+			 *
+			 * @param int $action_id
+			 */
 			do_action( 'action_scheduler_stored_action', $action_id );
 
 			return $action_id;
@@ -65,6 +78,15 @@ class DB_Store extends ActionScheduler_Store {
 		}
 	}
 
+	/**
+	 * Get the timestamp for an action.
+	 *
+	 * @param ActionScheduler_Action $action
+	 * @param \DateTime              $date
+	 *
+	 * @return string
+	 * @throws \InvalidArgumentException
+	 */
 	protected function get_timestamp( ActionScheduler_Action $action, \DateTime $date = null ) {
 		$next = is_null( $date ) ? $action->get_schedule()->next() : $date;
 		if ( ! $next ) {
@@ -75,6 +97,15 @@ class DB_Store extends ActionScheduler_Store {
 		return $next->format( 'Y-m-d H:i:s' );
 	}
 
+	/**
+	 * Get the local timestamp of an action.
+	 *
+	 * @param ActionScheduler_Action $action
+	 * @param \DateTime              $date
+	 *
+	 * @return string
+	 * @throws \InvalidArgumentException
+	 */
 	protected function get_local_timestamp( ActionScheduler_Action $action, \DateTime $date = null ) {
 		$next = is_null( $date ) ? $action->get_schedule()->next() : $date;
 		if ( ! $next ) {
@@ -564,6 +595,4 @@ class DB_Store extends ActionScheduler_Store {
 			return $status;
 		}
 	}
-
-
 }
