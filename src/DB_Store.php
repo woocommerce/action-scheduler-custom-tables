@@ -11,6 +11,26 @@ use ActionScheduler_Store;
 
 class DB_Store extends ActionScheduler_Store {
 
+	/**
+	 * Valid database fields for this data store.
+	 *
+	 * @var array
+	 */
+	protected $db_fields = [
+		'action_id'            => 1,
+		'hook'                 => 1,
+		'status'               => 1,
+		'scheduled_date_gmt'   => 1,
+		'scheduled_date_local' => 1,
+		'args'                 => 1,
+		'schedule'             => 1,
+		'group_id'             => 1,
+		'attempts'             => 1,
+		'last_attempt_gmt'     => 1,
+		'last_attempt_local'   => 1,
+		'claim_id'             => 1,
+	];
+
 
 	/**
 	 * @codeCoverageIgnore
