@@ -5,7 +5,11 @@ namespace Action_Scheduler\Custom_Tables\Migration;
 
 
 class Action_Migrator {
+
+	/** @var \ActionScheduler_Store */
 	private $source;
+
+	/** @var \ActionScheduler_Store */
 	private $destination;
 
 	public function __construct( \ActionScheduler_Store $source_store, \ActionScheduler_Store $destination_store ) {
