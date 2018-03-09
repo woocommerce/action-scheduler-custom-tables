@@ -79,6 +79,33 @@ class DB_Store extends ActionScheduler_Store {
 	}
 
 	/**
+	 * Update an existing action by ID.
+	 *
+	 * @author Jeremy Pry
+	 *
+	 * @param int   $action_id The action ID to update.
+	 * @param array $fields    The array of field data to update.
+	 *
+	 * @return false|int
+	 */
+	public function update_action( $action_id, array $fields ) {
+		/** @var \wpdb $wpdb */
+		global $wpdb;
+
+		// Limit fields to known columns.
+		$fields = array_intersect_key( $fields, $this->db_fields );
+
+		// Ensure the action ID is not part of the array.
+		unset( $fields['action_id'] );
+
+		return $wpdb->update(
+			$wpdb->{DB_Store_Table_Maker::ACTIONS_TABLE},
+			$fields,
+			[ 'action_id' => $action_id ]
+		);
+	}
+
+	/**
 	 * Get the timestamp for an action.
 	 *
 	 * @param ActionScheduler_Action $action
