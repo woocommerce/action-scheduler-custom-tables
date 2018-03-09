@@ -4,6 +4,8 @@
 namespace Action_Scheduler\Custom_Tables\Migration;
 
 
+use Action_Scheduler\Custom_Tables\DB_Store;
+
 class Action_Migrator {
 
 	/** @var \ActionScheduler_Store */
@@ -42,6 +44,15 @@ class Action_Migrator {
 
 		try {
 			$destination_action_id = $this->destination->save_action( $action );
+
+			// If the action is completed, make sure to set the dates properly.
+			if ( $action->is_finished() && $this->destination instanceof DB_Store && $this->source instanceof \ActionScheduler_wpPostStore ) {
+				$post = get_post( $source_action_id );
+				$this->destination->update_action( $destination_action_id, [
+					'last_attempt_gmt'   => $post->post_modified_gmt,
+					'last_attempt_local' => $post->post_modified,
+				] );
+			}
 		} catch ( \Exception $e ) {
 			do_action( 'action_scheduler/custom_tables/migrate_action_failed', $source_action_id, $this->source, $this->destination );
 
