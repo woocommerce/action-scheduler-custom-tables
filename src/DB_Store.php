@@ -184,6 +184,28 @@ class DB_Store extends ActionScheduler_Store {
 		return $this->make_action_from_db_record( $data );
 	}
 
+	/**
+	 * Get raw action data from the database.
+	 *
+	 * @author Jeremy Pry
+	 *
+	 * @param int $action_id
+	 *
+	 * @return \stdClass
+	 */
+	public function get_raw_action( $action_id ) {
+		/** @var \wpdb $wpdb */
+		global $wpdb;
+		$data = $wpdb->get_row( $wpdb->prepare(
+			"SELECT a.*, g.slug AS `group`
+			 FROM {$wpdb->actionscheduler_actions} a LEFT JOIN {$wpdb->actionscheduler_groups} g ON a.group_id=g.group_id
+			 WHERE a.action_id=%d",
+			$action_id
+		) );
+
+		return $data ?: new \stdClass();
+	}
+
 	protected function get_null_action() {
 		return new ActionScheduler_NullAction();
 	}
