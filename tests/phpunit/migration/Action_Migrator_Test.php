@@ -73,12 +73,15 @@ class Action_Migrator_Test extends UnitTestCase {
 
 		// ensure we get the same record out of the new store as we stored in the old
 		$retrieved = $destination->fetch_action( $new_id );
+		$raw = $destination->get_raw_action( $new_id );
 		$this->assertEquals( $action->get_hook(), $retrieved->get_hook() );
 		$this->assertEqualSets( $action->get_args(), $retrieved->get_args() );
 		$this->assertEquals( $action->get_schedule()->next()->format( 'U' ), $retrieved->get_schedule()->next()->format( 'U' ) );
 		$this->assertEquals( $action->get_group(), $retrieved->get_group() );
 		$this->assertTrue( $retrieved->is_finished() );
 		$this->assertEquals( \ActionScheduler_Store::STATUS_COMPLETE, $destination->get_status( $new_id ) );
+		$this->assertNotEquals( '0000-00-00 00:00:00', $raw->last_attempt_gmt );
+		$this->assertNotEquals( '0000-00-00 00:00:00', $raw->last_attempt_local );
 
 		// ensure that the record in the old store does not exist
 		$old_action = $source->fetch_action( $action_id );
