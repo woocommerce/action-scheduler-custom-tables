@@ -15,6 +15,6 @@ Action Scheduler uses WordPress posts to store scheduled actions in the existing
 To migrate actions in bulk using WP-CLI, run the following command:
 
 ```
-wp action-scheduler custom-tables migrate [--batch=<batch>] [--dry-run]
+wp action-scheduler custom-tables migrate [--batch-size=<batch>] [--dry-run]
 ```
 
