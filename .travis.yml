@@ -17,11 +17,13 @@ env:
   global:
     - AS_VERSION=1-6-dev
   matrix:
+    - WP_VERSION=4.9 WP_MULTISITE=0
     - WP_VERSION=4.8 WP_MULTISITE=0
     - WP_VERSION=4.7 WP_MULTISITE=0
     - WP_VERSION=4.6 WP_MULTISITE=0
     - WP_VERSION=4.5 WP_MULTISITE=0
     - WP_VERSION=4.4 WP_MULTISITE=0
+    - WP_VERSION=4.9 WP_MULTISITE=1
     - WP_VERSION=4.8 WP_MULTISITE=1
     - WP_VERSION=4.7 WP_MULTISITE=1
     - WP_VERSION=4.6 WP_MULTISITE=1
@@ -33,7 +35,7 @@ before_script:
     - source tests/travis/setup.sh $TRAVIS_PHP_VERSION
 
 script:
- - if [[ "$TRAVIS_PHP_VERSION" == "7.1" ]] && [[ "$WP_VERSION" == "4.8" ]] && [[ "$WP_MULTISITE" == "0" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then phpunit --configuration tests/phpunit.xml.dist --coverage-clover clover.xml; else phpunit --configuration tests/phpunit.xml.dist; fi
+ - if [[ "$TRAVIS_PHP_VERSION" == "7.1" ]] && [[ "$WP_VERSION" == "4.9" ]] && [[ "$WP_MULTISITE" == "0" ]] && [[ "$TRAVIS_BRANCH" == "master" ]]; then phpunit --configuration tests/phpunit.xml.dist --coverage-clover clover.xml; else phpunit --configuration tests/phpunit.xml.dist; fi
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
