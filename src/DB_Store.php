@@ -88,6 +88,11 @@ class DB_Store extends ActionScheduler_Store {
 			$fields['schedule'] = maybe_serialize( $fields['schedule'] );
 		}
 
+		// Allow passing a slug for the group.
+		if ( isset( $fields['group_id'] ) && ! is_numeric( $fields['group_id'] ) ) {
+			$fields['group_id'] = $this->get_group_id( $fields['group_id'] );
+		}
+
 		return $wpdb->update(
 			$wpdb->{DB_Store_Table_Maker::ACTIONS_TABLE},
 			$fields,
