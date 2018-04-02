@@ -66,7 +66,7 @@ class DB_Store extends ActionScheduler_Store {
 	 * @param int   $action_id The action ID to update.
 	 * @param array $fields    The array of field data to update.
 	 *
-	 * @return mixed False if the update fails, or the action ID on success.
+	 * @return mixed False if the update fails, or the number of updated rows on success.
 	 */
 	public function update_action( $action_id, array $fields ) {
 		/** @var \wpdb $wpdb */
