@@ -93,10 +93,20 @@ class DB_Store extends ActionScheduler_Store {
 		global $wpdb;
 
 		// Limit fields to known columns.
-		$fields = array_intersect_key( $fields, $this->db_fields );
+		$fields = $this->get_valid_fields( $fields );
 
 		// Ensure the action ID is not part of the array.
 		unset( $fields['action_id'] );
+
+		// Ensure args are JSON encoded.
+		if ( isset( $fields['args'] ) && is_array( $fields['args'] ) ) {
+			$fields['args'] = json_encode( $fields['args'] );
+		}
+
+		// Serialize the schedule if needed.
+		if ( isset( $fields['schedule'] ) ) {
+			$fields['schedule'] = maybe_serialize( $fields['schedule'] );
+		}
 
 		return $wpdb->update(
 			$wpdb->{DB_Store_Table_Maker::ACTIONS_TABLE},
