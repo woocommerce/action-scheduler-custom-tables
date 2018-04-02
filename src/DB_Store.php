@@ -8,6 +8,7 @@ use ActionScheduler_FinishedAction;
 use ActionScheduler_NullAction;
 use ActionScheduler_NullSchedule;
 use ActionScheduler_Store;
+use DateTime;
 
 class DB_Store extends ActionScheduler_Store {
 
@@ -653,5 +654,24 @@ class DB_Store extends ActionScheduler_Store {
 		} else {
 			return $status;
 		}
+	}
+
+	/**
+	 * Get the last time the action was attempted.
+	 *
+	 * The time should be given in GMT.
+	 *
+	 * @param string $action_id
+	 *
+	 * @return DateTime|null
+	 */
+	public function get_last_attempt( $action_id ) {
+		global $wpdb;
+		$raw_date = $wpdb->get_var( $wpdb->prepare(
+			"SELECT last_attempt_gmt FROM {$wpdb->actionscheduler_actions} WHERE action_id = %d",
+			(int) $action_id
+		) );
+
+		return null === $raw_date || '0000-00-00 00:00:00' === $raw_date ? null : as_get_datetime_object( $raw_date );
 	}
 }
