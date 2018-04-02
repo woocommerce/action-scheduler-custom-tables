@@ -658,4 +658,25 @@ class DB_Store extends ActionScheduler_Store {
 
 		return null === $raw_date || '0000-00-00 00:00:00' === $raw_date ? null : as_get_datetime_object( $raw_date );
 	}
+
+	/**
+	 * Get the last time the action was attempted.
+	 *
+	 * The time should be given in the local time of the site.
+	 *
+	 * @param string $action_id
+	 *
+	 * @return DateTime|null
+	 */
+	public function get_last_attempt_local( $action_id ) {
+		global $wpdb;
+		$raw_date = $wpdb->get_var( $wpdb->prepare(
+			"SELECT last_attempt_gmt_local FROM {$wpdb->actionscheduler_actions} WHERE action_id = %d",
+			(int) $action_id
+		) );
+
+		return null === $raw_date || '0000-00-00 00:00:00' === $raw_date
+			? null
+			: as_get_datetime_object( $raw_date, get_option( 'gmt_offset' ) );
+	}
 }
