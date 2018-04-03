@@ -3,6 +3,8 @@
 
 namespace Action_Scheduler\Custom_Tables;
 
+use Action_Scheduler\Custom_Tables\Migration\Migration_Scheduler;
+
 /**
  * Class Plugin
  *
@@ -17,6 +19,18 @@ namespace Action_Scheduler\Custom_Tables;
  */
 class Plugin {
 	private static $instance;
+
+	/** @var Migration_Scheduler */
+	private $migration_scheduler;
+
+	/**
+	 * Plugin constructor.
+	 *
+	 * @param Migration_Scheduler $migration_scheduler
+	 */
+	public function __construct( Migration_Scheduler $migration_scheduler = null ) {
+		$this->migration_scheduler = $migration_scheduler ?: new Migration_Scheduler();
+	}
 
 	/**
 	 * Override the action store with our own
