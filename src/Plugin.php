@@ -40,8 +40,7 @@ class Plugin {
 	 * @return string
 	 */
 	public function set_store_class( $class ) {
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( $scheduler->is_migration_complete() ) {
+		if ( $this->migration_scheduler->is_migration_complete() ) {
 			return DB_Store::class;
 		} else {
 			return Hybrid_Store::class;
@@ -77,26 +76,11 @@ class Plugin {
 	 * @return void
 	 */
 	public function schedule_migration() {
-
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( false === $scheduler->do_background_migration() || $scheduler->is_migration_scheduled() ) {
+		if ( $this->migration_scheduler->is_migration_complete() || $this->migration_scheduler->is_migration_scheduled() ) {
 			return;
 		}
-		$scheduler->schedule_migration();
-	}
 
-	/**
-	 * Attach the callback to run the background migration process
-	 *
-	 * @return void
-	 */
-	public function hook_scheduled_migration() {
-
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( false === $scheduler->do_background_migration() ) {
-			return;
-		}
-		$scheduler->hook();
+		$this->migration_scheduler->schedule_migration();
 	}
 
 	/**
@@ -115,8 +99,7 @@ class Plugin {
 	}
 
 	public function hook_admin_notices() {
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( $scheduler->is_migration_complete() ) {
+		if ( $this->migration_scheduler->is_migration_complete() ) {
 			return;
 		}
 		add_action( 'admin_notices', [ $this, 'display_migration_notice' ], 10, 0 );
