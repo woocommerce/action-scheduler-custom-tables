@@ -131,12 +131,25 @@ class Plugin {
 		add_filter( 'action_scheduler_store_class', [ $this, 'set_store_class' ], 10, 1 );
 		add_filter( 'action_scheduler_logger_class', [ $this, 'set_logger_class' ], 10, 1 );
 		add_action( 'plugins_loaded', [ $this, 'register_cli_command' ], 10, 0 );
-		add_action( 'plugins_loaded', [ $this, 'hook_scheduled_migration' ], 1000, 0 );
+		add_action( 'init', [ $this, 'maybe_hook_migration' ] );
 		add_action( 'shutdown', [ $this, 'schedule_migration' ], 0, 0 );
 
 		// Action Scheduler may be displayed as a Tools screen or WooCommerce > Status administration screen
 		add_action( 'load-tools_page_action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
 		add_action( 'load-woocommerce_page_wc-status', [ $this, 'hook_admin_notices' ], 10, 0 );
+	}
+
+	/**
+	 * Possibly hook the migration scheduler action.
+	 *
+	 * @author Jeremy Pry
+	 */
+	public function maybe_hook_migration() {
+		if ( $this->migration_scheduler->is_migration_complete() ) {
+			return;
+		}
+
+		$this->migration_scheduler->hook();
 	}
 
 	public static function init() {
