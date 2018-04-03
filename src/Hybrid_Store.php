@@ -275,4 +275,52 @@ class Hybrid_Store extends Store {
 	public function find_actions_by_claim_id( $claim_id ) {
 		return $this->primary_store->find_actions_by_claim_id( $claim_id );
 	}
+
+	/**
+	 * Update an existing action by ID.
+	 *
+	 * This will check whether the action has been migrated, and migrate it if necessary.
+	 *
+	 * @param string $action_id The action ID to update.
+	 * @param array  $fields    The array of field data to update.
+	 *
+	 * @return mixed
+	 */
+	public function update_action( $action_id, array $fields ) {
+		if ( ! $this->action_in_primary_store( $action_id ) ) {
+			$this->migrate( [ $action_id ] );
+		}
+
+		return $this->primary_store->update_action( $action_id, $fields );
+	}
+
+	/**
+	 * Get the last time the action was attempted.
+	 *
+	 * The time should be given in GMT.
+	 *
+	 * @param string $action_id
+	 *
+	 * @return DateTime|null
+	 */
+	public function get_last_attempt( $action_id ) {
+		return $this->action_in_primary_store( $action_id )
+			? $this->primary_store->get_last_attempt( $action_id )
+			: $this->secondary_store->get_last_attempt( $action_id );
+	}
+
+	/**
+	 * Get the last time the action was attempted.
+	 *
+	 * The time should be given in the local time of the site.
+	 *
+	 * @param string $action_id
+	 *
+	 * @return DateTime|null
+	 */
+	public function get_last_attempt_local( $action_id ) {
+		return $this->action_in_primary_store( $action_id )
+			? $this->primary_store->get_last_attempt_local( $action_id )
+			: $this->secondary_store->get_last_attempt_local( $action_id );
+	}
 }
