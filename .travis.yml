@@ -15,7 +15,7 @@ php:
 # AS_VERSION = branch of action-scheduler to test against
 env:
   global:
-    - AS_VERSION=1-6-dev
+    - AS_VERSION=asct_issue_10
   matrix:
     - WP_VERSION=4.9 WP_MULTISITE=0
     - WP_VERSION=4.8 WP_MULTISITE=0

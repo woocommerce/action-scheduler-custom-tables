@@ -3,9 +3,12 @@
 
 namespace Action_Scheduler\Custom_Tables\Migration;
 
-
 class Action_Migrator {
+
+	/** @var \ActionScheduler_Store */
 	private $source;
+
+	/** @var \ActionScheduler_Store */
 	private $destination;
 
 	public function __construct( \ActionScheduler_Store $source_store, \ActionScheduler_Store $destination_store ) {
@@ -38,6 +41,14 @@ class Action_Migrator {
 
 		try {
 			$destination_action_id = $this->destination->save_action( $action );
+
+			// If the action is completed, make sure to set the dates properly.
+			if ( $action->is_finished() ) {
+				$this->destination->update_action( $destination_action_id, [
+					'last_attempt_gmt'   => $this->source->get_last_attempt( $source_action_id ),
+					'last_attempt_local' => $this->source->get_last_attempt_local( $source_action_id ),
+				] );
+			}
 		} catch ( \Exception $e ) {
 			do_action( 'action_scheduler/custom_tables/migrate_action_failed', $source_action_id, $this->source, $this->destination );
 

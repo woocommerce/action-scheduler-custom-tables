@@ -8,9 +8,9 @@ use ActionScheduler_FinishedAction;
 use ActionScheduler_NullAction;
 use ActionScheduler_NullSchedule;
 use ActionScheduler_Store;
+use DateTime;
 
 class DB_Store extends ActionScheduler_Store {
-
 
 	/**
 	 * @codeCoverageIgnore
@@ -20,7 +20,15 @@ class DB_Store extends ActionScheduler_Store {
 		$table_maker->register_tables();
 	}
 
-
+	/**
+	 * Save an action in the database.
+	 *
+	 * @param ActionScheduler_Action $action
+	 * @param \DateTime              $date
+	 *
+	 * @return int|string
+	 * @throws \RuntimeException
+	 */
 	public function save_action( ActionScheduler_Action $action, \DateTime $date = null ) {
 		try {
 			/** @var \wpdb $wpdb */
@@ -37,6 +45,11 @@ class DB_Store extends ActionScheduler_Store {
 			$wpdb->insert( $wpdb->actionscheduler_actions, $data );
 			$action_id = $wpdb->insert_id;
 
+			/**
+			 * Run once an action has been stored in the DB.
+			 *
+			 * @param int $action_id
+			 */
 			do_action( 'action_scheduler_stored_action', $action_id );
 
 			return $action_id;
@@ -45,6 +58,57 @@ class DB_Store extends ActionScheduler_Store {
 		}
 	}
 
+	/**
+	 * Update an existing action by ID.
+	 *
+	 * @author Jeremy Pry
+	 *
+	 * @param int   $action_id The action ID to update.
+	 * @param array $fields    The array of field data to update.
+	 *
+	 * @return mixed False if the update fails, or the number of updated rows on success.
+	 */
+	public function update_action( $action_id, array $fields ) {
+		/** @var \wpdb $wpdb */
+		global $wpdb;
+
+		// Limit fields to known columns.
+		$fields = $this->get_valid_fields( $fields );
+
+		// Ensure the action ID is not part of the array.
+		unset( $fields['action_id'] );
+
+		// Ensure args are JSON encoded.
+		if ( isset( $fields['args'] ) && is_array( $fields['args'] ) ) {
+			$fields['args'] = json_encode( $fields['args'] );
+		}
+
+		// Serialize the schedule if needed.
+		if ( isset( $fields['schedule'] ) ) {
+			$fields['schedule'] = maybe_serialize( $fields['schedule'] );
+		}
+
+		// Allow passing a slug for the group.
+		if ( isset( $fields['group_id'] ) && ! is_numeric( $fields['group_id'] ) ) {
+			$fields['group_id'] = $this->get_group_id( $fields['group_id'] );
+		}
+
+		return $wpdb->update(
+			$wpdb->{DB_Store_Table_Maker::ACTIONS_TABLE},
+			$fields,
+			[ 'action_id' => $action_id ]
+		);
+	}
+
+	/**
+	 * Get the timestamp for an action.
+	 *
+	 * @param ActionScheduler_Action $action
+	 * @param \DateTime              $date
+	 *
+	 * @return string
+	 * @throws \InvalidArgumentException
+	 */
 	protected function get_timestamp( ActionScheduler_Action $action, \DateTime $date = null ) {
 		$next = is_null( $date ) ? $action->get_schedule()->next() : $date;
 		if ( ! $next ) {
@@ -55,6 +119,15 @@ class DB_Store extends ActionScheduler_Store {
 		return $next->format( 'Y-m-d H:i:s' );
 	}
 
+	/**
+	 * Get the local timestamp of an action.
+	 *
+	 * @param ActionScheduler_Action $action
+	 * @param \DateTime              $date
+	 *
+	 * @return string
+	 * @throws \InvalidArgumentException
+	 */
 	protected function get_local_timestamp( ActionScheduler_Action $action, \DateTime $date = null ) {
 		$next = is_null( $date ) ? $action->get_schedule()->next() : $date;
 		if ( ! $next ) {
@@ -545,5 +618,43 @@ class DB_Store extends ActionScheduler_Store {
 		}
 	}
 
+	/**
+	 * Get the last time the action was attempted.
+	 *
+	 * The time should be given in GMT.
+	 *
+	 * @param string $action_id
+	 *
+	 * @return DateTime|null
+	 */
+	public function get_last_attempt( $action_id ) {
+		global $wpdb;
+		$raw_date = $wpdb->get_var( $wpdb->prepare(
+			"SELECT last_attempt_gmt FROM {$wpdb->actionscheduler_actions} WHERE action_id = %d",
+			(int) $action_id
+		) );
 
+		return null === $raw_date || '0000-00-00 00:00:00' === $raw_date ? null : as_get_datetime_object( $raw_date );
+	}
+
+	/**
+	 * Get the last time the action was attempted.
+	 *
+	 * The time should be given in the local time of the site.
+	 *
+	 * @param string $action_id
+	 *
+	 * @return DateTime|null
+	 */
+	public function get_last_attempt_local( $action_id ) {
+		global $wpdb;
+		$raw_date = $wpdb->get_var( $wpdb->prepare(
+			"SELECT last_attempt_gmt_local FROM {$wpdb->actionscheduler_actions} WHERE action_id = %d",
+			(int) $action_id
+		) );
+
+		return null === $raw_date || '0000-00-00 00:00:00' === $raw_date
+			? null
+			: as_get_datetime_object( $raw_date, get_option( 'gmt_offset' ) );
+	}
 }

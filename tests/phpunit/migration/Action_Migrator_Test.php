@@ -79,6 +79,8 @@ class Action_Migrator_Test extends UnitTestCase {
 		$this->assertEquals( $action->get_group(), $retrieved->get_group() );
 		$this->assertTrue( $retrieved->is_finished() );
 		$this->assertEquals( \ActionScheduler_Store::STATUS_COMPLETE, $destination->get_status( $new_id ) );
+		$this->assertEquals( $source->get_last_attempt( $action_id ), $destination->get_last_attempt( $new_id ) );
+		$this->assertEquals( $source->get_last_attempt_local( $action_id ), $destination->get_last_attempt_local( $new_id ) );
 
 		// ensure that the record in the old store does not exist
 		$old_action = $source->fetch_action( $action_id );
