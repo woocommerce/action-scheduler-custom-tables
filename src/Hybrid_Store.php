@@ -242,6 +242,18 @@ class Hybrid_Store extends Store {
 		}
 	}
 
+	/**
+	 * Determine whether the action is in the primary store.
+	 *
+	 * @todo Use this method for other methods in this class.
+	 *
+	 * @param mixed $action_id
+	 *
+	 * @return bool
+	 */
+	protected function action_in_primary_store( $action_id ) {
+		return $action_id >= $this->demarkation_id;
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * *
 	 * All claim-related functions should operate solely
