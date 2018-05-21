@@ -174,8 +174,8 @@ class Hybrid_Store extends Store {
 		$this->migration_runner->migrate_actions( $action_ids );
 	}
 
-	public function save_action( ActionScheduler_Action $action, DateTime $date = null ) {
-		return $this->primary_store->save_action( $action, $date );
+	public function save_action( ActionScheduler_Action $action, \DateTime $scheduled_date = null ){
+		return $this->primary_store->save_action( $action, $scheduled_date );
 	}
 
 	public function fetch_action( $action_id ) {
