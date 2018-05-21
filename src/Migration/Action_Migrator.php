@@ -37,7 +37,11 @@ class Action_Migrator {
 		}
 
 		try {
-			$destination_action_id = $this->destination->save_action( $action );
+
+			// Make sure the last attempt date is set correctly for completed and failed actions
+			$last_attempt_date = ( $status !== \ActionScheduler_Store::STATUS_PENDING ) ? $this->source->get_date( $source_action_id ) : null;
+
+			$destination_action_id = $this->destination->save_action( $action, null, $last_attempt_date );
 		} catch ( \Exception $e ) {
 			do_action( 'action_scheduler/custom_tables/migrate_action_failed', $source_action_id, $this->source, $this->destination );
 

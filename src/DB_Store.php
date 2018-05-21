@@ -21,7 +21,7 @@ class DB_Store extends ActionScheduler_Store {
 	}
 
 
-	public function save_action( ActionScheduler_Action $action, \DateTime $scheduled_date = null ){
+	public function save_action( ActionScheduler_Action $action, \DateTime $scheduled_date = null, \DateTime $last_attempt_date = null ){
 		try {
 			/** @var \wpdb $wpdb */
 			global $wpdb;
@@ -34,6 +34,12 @@ class DB_Store extends ActionScheduler_Store {
 				'schedule'             => serialize( $action->get_schedule() ),
 				'group_id'             => $this->get_group_id( $action->get_group() ),
 			];
+
+			if ( ! is_null( $last_attempt_date ) ) {
+				$data['last_attempt_gmt']   = $this->get_timestamp( $action, $last_attempt_date );
+				$data['last_attempt_local'] = $this->get_local_timestamp( $action, $last_attempt_date );
+			}
+
 			$wpdb->insert( $wpdb->actionscheduler_actions, $data );
 			$action_id = $wpdb->insert_id;
 
