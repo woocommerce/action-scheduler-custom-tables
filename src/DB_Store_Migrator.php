@@ -29,8 +29,8 @@ class DB_Store_Migrator extends DB_Store {
 
 			if ( null !== $last_attempt_date ) {
 				$data = [
-					'last_attempt_gmt'   => $this->get_timestamp( $action, $last_attempt_date ),
-					'last_attempt_local' => $this->get_local_timestamp( $action, $last_attempt_date ),
+					'last_attempt_gmt'   => $this->get_scheduled_date_string( $action, $last_attempt_date ),
+					'last_attempt_local' => $this->get_scheduled_date_string_local( $action, $last_attempt_date ),
 				];
 
 				$wpdb->update( $wpdb->actionscheduler_actions, $data, array( 'action_id' => $action_id ), array( '%s', '%s' ), array( '%d' ) );
