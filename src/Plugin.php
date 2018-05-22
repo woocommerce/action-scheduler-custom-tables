@@ -94,7 +94,7 @@ class Plugin {
 		$config = new Migration\Migration_Config();
 		$config->set_source_store( new \ActionScheduler_wpPostStore() );
 		$config->set_source_logger( new \ActionScheduler_wpCommentLogger() );
-		$config->set_destination_store( new DB_Store() );
+		$config->set_destination_store( new DB_Store_Migrator() );
 		$config->set_destination_logger( new DB_Logger() );
 
 		return apply_filters( 'action_scheduler/custom_tables/migration_config', $config );
