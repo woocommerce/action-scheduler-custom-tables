@@ -3,11 +3,6 @@
 namespace Action_Scheduler\Custom_Tables;
 
 use ActionScheduler_Action;
-use ActionScheduler_ActionClaim;
-use ActionScheduler_FinishedAction;
-use ActionScheduler_NullAction;
-use ActionScheduler_NullSchedule;
-use ActionScheduler_Store;
 
 class DB_Store_Migrator extends DB_Store {
 
@@ -19,13 +14,15 @@ class DB_Store_Migrator extends DB_Store {
 	 * that when first saving the action.
 	 *
 	 * @param ActionScheduler_Action $action
-	 * @param DateTime $scheduled_date Optional date of the first instance to store.
-	 * @param DateTime $last_attempt_date Optional date the action was last attempted.
+	 * @param \DateTime $scheduled_date Optional date of the first instance to store.
+	 * @param \DateTime $last_attempt_date Optional date the action was last attempted.
+	 *
 	 * @return string The action ID
+	 * @throws \RuntimeException When the action is not saved.
 	 */
 	public function save_action( ActionScheduler_Action $action, \DateTime $scheduled_date = null, \DateTime $last_attempt_date = null ){
 		try {
-			/** @var wpdb $wpdb */
+			/** @var \wpdb $wpdb */
 			global $wpdb;
 
 			$action_id = parent::save_action( $action, $scheduled_date );
