@@ -120,7 +120,7 @@ class Plugin {
 		add_action( 'plugins_loaded', [ $this, 'hook_scheduled_migration' ], 1000, 0 );
 		add_action( 'shutdown', [ $this, 'schedule_migration' ], 0, 0 );
 
-		// Action Scheduler may be displayed as a Tools screen or WooCommerce > Status adminstration screen
+		// Action Scheduler may be displayed as a Tools screen or WooCommerce > Status administration screen
 		add_action( 'load-tools_page_action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
 		add_action( 'load-woocommerce_page_wc-status', [ $this, 'hook_admin_notices' ], 10, 0 );
 	}

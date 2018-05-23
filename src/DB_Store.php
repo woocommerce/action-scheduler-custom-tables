@@ -265,7 +265,7 @@ class DB_Store extends ActionScheduler_Store {
 		}
 
 		if ( 'select' === $select_or_count ) {
-			switch ( $query[ 'orderby' ] ) {
+			switch ( $query['orderby'] ) {
 				case 'hook':
 					$orderby = 'a.hook';
 					break;
@@ -303,8 +303,7 @@ class DB_Store extends ActionScheduler_Store {
 	/**
 	 * @param array $query
 	 * @param string $query_type Whether to select or count the results. Default, select.
-	 *
-	 * @return int[] The IDs of actions matching the query
+	 * @return null|string|array The IDs of actions matching the query
 	 */
 	public function query_actions( $query = [], $query_type = 'select' ) {
 		/** @var wpdb $wpdb */
