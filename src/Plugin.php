@@ -65,7 +65,7 @@ class Plugin {
 	public function schedule_migration() {
 
 		$scheduler = new Migration\Migration_Scheduler();
-		if ( false == $scheduler->do_background_migration() || $scheduler->is_migration_scheduled() ) {
+		if ( false === $scheduler->do_background_migration() || $scheduler->is_migration_scheduled() ) {
 			return;
 		}
 		$scheduler->schedule_migration();
@@ -79,7 +79,7 @@ class Plugin {
 	public function hook_scheduled_migration() {
 
 		$scheduler = new Migration\Migration_Scheduler();
-		if ( false == $scheduler->do_background_migration() ) {
+		if ( false === $scheduler->do_background_migration() ) {
 			return;
 		}
 		$scheduler->hook();

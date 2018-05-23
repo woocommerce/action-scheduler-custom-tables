@@ -49,7 +49,7 @@ class Migration_Scheduler {
 	 * @return bool Whether to do background migrations, defaults to true until the migration is complete
 	 */
 	public function do_background_migration() {
-		return apply_filters( 'action_scheduler/custom_tables/do_background_migration', ! $this->is_migration_complete() );
+		return (bool)apply_filters( 'action_scheduler/custom_tables/do_background_migration', ! $this->is_migration_complete() );
 	}
 
 	/**
