@@ -188,6 +188,11 @@ class DB_Store extends ActionScheduler_Store {
 	 * @return string SQL statement. The returned SQL is already properly escaped.
 	 */
 	protected function get_query_actions_sql( array $query, $select_or_count = 'select' ) {
+
+		if ( ! in_array( $select_or_count, array( 'select', 'count' ) ) ) {
+			throw new \InvalidArgumentException( __( 'Invalid valud for select or count parameter. Cannot query actions.', 'action-scheduler' ) );
+		}
+
 		$query = wp_parse_args( $query, [
 			'hook'             => '',
 			'args'             => null,
