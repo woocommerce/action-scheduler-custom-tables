@@ -12,12 +12,25 @@ class UnitTestCase extends \WP_UnitTestCase {
 	protected $existing_timezone;
 
 	/**
+	 * Counts the number of test cases executed by run(TestResult result).
+	 *
+	 * @return int
+	 */
+	public function count() {
+		return 'UTC' == date_default_timezone_get() ? 2 : 3;
+	}
+
+	/**
 	 * We want to run every test multiple times using a different timezone to make sure
 	 * that they are unaffected by changes to PHP's timezone.
+	 *
+	 * @param \PHPUnit_Framework_TestResult $result
+	 *
+	 * @return \PHPUnit_Framework_TestResult
 	 */
-	public function run( \PHPUnit_Framework_TestResult $result = NULL ){
+	public function run( \PHPUnit_Framework_TestResult $result = null ) {
 
-		if ($result === NULL) {
+		if ( $result === null ) {
 			$result = $this->createResult();
 		}
 
@@ -37,4 +50,3 @@ class UnitTestCase extends \WP_UnitTestCase {
 		return $result;
 	}
 }
- 
