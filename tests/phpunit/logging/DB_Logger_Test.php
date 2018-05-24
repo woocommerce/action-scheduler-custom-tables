@@ -18,7 +18,7 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_add_log_entry() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
+		$action_id = wc_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$message = 'Logging that something happened';
 		$log_id = $logger->log( $action_id, $message );
@@ -36,15 +36,17 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_storage_logs() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
+		$action_id = wc_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$logs = $logger->get_logs( $action_id );
 		$expected = new ActionScheduler_LogEntry( $action_id, 'action created' );
-		$this->assertTrue( in_array( $expected, $logs ) );
+		$this->assertCount( 1, $logs );
+		$this->assertEquals( $expected->get_action_id(), $logs[0]->get_action_id() );
+		$this->assertEquals( $expected->get_message(), $logs[0]->get_message() );
 	}
 
 	public function test_execution_logs() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
+		$action_id = wc_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$started = new ActionScheduler_LogEntry( $action_id, 'action started' );
 		$finished = new ActionScheduler_LogEntry( $action_id, 'action complete' );
@@ -52,13 +54,21 @@ class DB_Logger_Test extends UnitTestCase {
 		$runner = new ActionScheduler_QueueRunner();
 		$runner->run();
 
+		// Expect 3 logs with the correct action ID.
 		$logs = $logger->get_logs( $action_id );
-		$this->assertTrue( in_array( $started, $logs ) );
-		$this->assertTrue( in_array( $finished, $logs ) );
+		$this->assertCount( 3, $logs );
+		foreach ( $logs as $log ) {
+			$this->assertEquals( $action_id, $log->get_action_id() );
+		}
+
+		// Expect created, then started, then completed.
+		$this->assertEquals( 'action created', $logs[0]->get_message() );
+		$this->assertEquals( $started->get_message(), $logs[1]->get_message() );
+		$this->assertEquals( $finished->get_message(), $logs[2]->get_message() );
 	}
 
 	public function test_failed_execution_logs() {
-		$hook = md5(rand());
+		$hook = __METHOD__;
 		add_action( $hook, array( $this, '_a_hook_callback_that_throws_an_exception' ) );
 		$action_id = wc_schedule_single_action( time(), $hook );
 		$logger = ActionScheduler::logger();
@@ -69,15 +79,22 @@ class DB_Logger_Test extends UnitTestCase {
 		$runner = new ActionScheduler_QueueRunner();
 		$runner->run();
 
+		// Expect 3 logs with the correct action ID.
 		$logs = $logger->get_logs( $action_id );
-		$this->assertTrue( in_array( $started, $logs ) );
-		$this->assertFalse( in_array( $finished, $logs ) );
-		$this->assertTrue( in_array( $failed, $logs ) );
+		$this->assertCount( 3, $logs );
+		foreach ( $logs as $log ) {
+			$this->assertEquals( $action_id, $log->get_action_id() );
+			$this->assertNotEquals( $finished->get_message(), $log->get_message() );
+		}
+
+		// Expect created, then started, then failed.
+		$this->assertEquals( 'action created', $logs[0]->get_message() );
+		$this->assertEquals( $started->get_message(), $logs[1]->get_message() );
+		$this->assertEquals( $failed->get_message(), $logs[2]->get_message() );
 	}
 
 	public function test_fatal_error_log() {
-		$hook = md5(rand());
-		$action_id = wc_schedule_single_action( time(), $hook );
+		$action_id = wc_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		do_action( 'action_scheduler_unexpected_shutdown', $action_id, array(
 			'type' => E_ERROR,
@@ -97,12 +114,12 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_canceled_action_log() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
-		wc_unschedule_action( 'a hook' );
+		$action_id = wc_schedule_single_action( time(), __METHOD__ );
+		wc_unschedule_action( __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$logs = $logger->get_logs( $action_id );
 		$expected = new ActionScheduler_LogEntry( $action_id, 'action canceled' );
-		$this->assertTrue( in_array( $expected, $logs ) );
+		$this->assertEquals( $expected->get_message(), end( $logs )->get_message() );
 	}
 
 	public function test_deleted_action_cleanup() {
@@ -125,4 +142,3 @@ class DB_Logger_Test extends UnitTestCase {
 		throw new \RuntimeException('Execution failed');
 	}
 }
- 
