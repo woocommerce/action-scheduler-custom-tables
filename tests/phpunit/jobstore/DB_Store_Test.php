@@ -46,7 +46,7 @@ class DB_Store_Test extends UnitTestCase {
 		$store->cancel_action( $action_id );
 
 		$fetched = $store->fetch_action( $action_id );
-		$this->assertInstanceOf( 'ActionScheduler_NullAction', $fetched );
+		$this->assertInstanceOf( 'ActionScheduler_CanceledAction', $fetched );
 	}
 
 	public function test_claim_actions() {
@@ -175,4 +175,3 @@ class DB_Store_Test extends UnitTestCase {
 		$this->assertEquals( ActionScheduler_Store::STATUS_FAILED, $store->get_status( $action_id ) );
 	}
 }
- 

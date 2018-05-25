@@ -66,7 +66,6 @@ class Migration_Scheduler_Test extends UnitTestCase {
 		$this->assertCount( 20, $source_store->query_actions( [ 'per_page' => 0 ] ) );
 
 		$scheduler = new Migration_Scheduler();
-		$scheduler->hook();
 		$scheduler->schedule_migration();
 
 		$queue_runner = new \ActionScheduler_QueueRunner( $destination_store );
@@ -74,8 +73,6 @@ class Migration_Scheduler_Test extends UnitTestCase {
 
 		// 5 actions should have moved from the source store when the queue runner triggered the migration action
 		$this->assertCount( 15, $source_store->query_actions( [ 'per_page' => 0 ] ) );
-
-		$scheduler->unhook();
 
 		remove_filter( 'action_scheduler/custom_tables/migration_batch_size', $return_5 );
 	}
@@ -94,7 +91,6 @@ class Migration_Scheduler_Test extends UnitTestCase {
 		$this->assertCount( 5, $source_store->query_actions( [ 'per_page' => 0 ] ) );
 
 		$scheduler = new Migration_Scheduler();
-		$scheduler->hook();
 		$scheduler->schedule_migration();
 
 		$queue_runner = new \ActionScheduler_QueueRunner( $destination_store );

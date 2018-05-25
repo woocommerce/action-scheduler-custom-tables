@@ -63,20 +63,26 @@ class Plugin {
 	 * @return void
 	 */
 	public function schedule_migration() {
-		if ( ! apply_filters( 'action_scheduler/custom_tables/do_background_migration', true ) ) {
-			return;
-		}
 
 		$scheduler = new Migration\Migration_Scheduler();
-		if ( $scheduler->is_migration_complete() ) {
-			return;
-		}
-		$scheduler->hook();
-
-		if ( $scheduler->is_migration_scheduled() ) {
+		if ( false === $scheduler->do_background_migration() || $scheduler->is_migration_scheduled() ) {
 			return;
 		}
 		$scheduler->schedule_migration();
+	}
+
+	/**
+	 * Attach the callback to run the background migration process
+	 *
+	 * @return void
+	 */
+	public function hook_scheduled_migration() {
+
+		$scheduler = new Migration\Migration_Scheduler();
+		if ( false === $scheduler->do_background_migration() ) {
+			return;
+		}
+		$scheduler->hook();
 	}
 
 	/**
@@ -103,17 +109,20 @@ class Plugin {
 	}
 
 	public function display_migration_notice() {
-		printf( '<div class="notice notice-warning"><p>%s</p></div>', __( 'Migration in progress. The list of scheduled actions may be incomplete.' ) );
+		printf( '<div class="notice notice-warning"><p>%s</p></div>', __( 'Action Scheduler migration in progress. The list of scheduled actions may be incomplete.' ) );
 	}
 
 	private function hook() {
+
 		add_filter( 'action_scheduler_store_class', [ $this, 'set_store_class' ], 10, 1 );
 		add_filter( 'action_scheduler_logger_class', [ $this, 'set_logger_class' ], 10, 1 );
 		add_action( 'plugins_loaded', [ $this, 'register_cli_command' ], 10, 0 );
+		add_action( 'plugins_loaded', [ $this, 'hook_scheduled_migration' ], 1000, 0 );
 		add_action( 'shutdown', [ $this, 'schedule_migration' ], 0, 0 );
 
-		// TODO: add this to the correct load-* hook once the admin page exists
-		add_action( 'load-action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
+		// Action Scheduler may be displayed as a Tools screen or WooCommerce > Status administration screen
+		add_action( 'load-tools_page_action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
+		add_action( 'load-woocommerce_page_wc-status', [ $this, 'hook_admin_notices' ], 10, 0 );
 	}
 
 	public static function init() {
