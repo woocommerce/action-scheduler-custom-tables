@@ -4,6 +4,7 @@ namespace Action_Scheduler\Custom_Tables;
 
 use ActionScheduler_Action;
 use ActionScheduler_ActionClaim;
+use ActionScheduler_CanceledAction;
 use ActionScheduler_FinishedAction;
 use ActionScheduler_NullAction;
 use ActionScheduler_NullSchedule;
@@ -122,7 +123,7 @@ class DB_Store extends ActionScheduler_Store {
 		if ( $data->status == self::STATUS_PENDING ) {
 			$action = new ActionScheduler_Action( $hook, $args, $schedule, $group );
 		} elseif ( $data->status == self::STATUS_CANCELED ) {
-			$action = new ActionScheduler_NullAction( $hook, $args, $schedule, $group );
+			$action = new ActionScheduler_CanceledAction( $hook, $args, $schedule, $group );
 		} else {
 			$action = new ActionScheduler_FinishedAction( $hook, $args, $schedule, $group );
 		}
