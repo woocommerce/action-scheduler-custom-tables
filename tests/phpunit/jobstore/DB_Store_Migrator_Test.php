@@ -1,17 +1,16 @@
 <?php
 
 namespace Action_Scheduler\Custom_Tables;
-use ActionScheduler_Action;
-use ActionScheduler_IntervalSchedule;
+
+use ActionScheduler_FinishedAction;
 use ActionScheduler_SimpleSchedule;
-use ActionScheduler_Store;
 
 /**
- * Class DB_Store_Test
+ * Class DB_Store_Migrator_Test
  *
  * @group stores
  */
-class DB_Store_Test extends UnitTestCase {
+class DB_Store_Migrator_Test extends UnitTestCase {
 
 	public function test_create_action_with_last_attempt_date() {
 		$scheduled_date    = as_get_datetime_object( strtotime( '-24 hours' ) );
@@ -31,4 +30,3 @@ class DB_Store_Test extends UnitTestCase {
 		$this->assertEquals( $last_attempt_date->format( 'U' ), $action_date->format( 'U' ) );
 	}
 }
- 
