@@ -391,7 +391,7 @@ class DB_Store extends ActionScheduler_Store {
 	 * @throws \InvalidArgumentException
 	 * @return \DateTime The GMT date the action is scheduled to run, or the date that it ran.
 	 */
-	public function get_date_gmt( $action_id ) {
+	protected function get_date_gmt( $action_id ) {
 		/** @var \wpdb $wpdb */
 		global $wpdb;
 		$record = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->actionscheduler_actions} WHERE action_id=%d", $action_id ) );
