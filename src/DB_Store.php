@@ -29,8 +29,8 @@ class DB_Store extends ActionScheduler_Store {
 			$data = [
 				'hook'                 => $action->get_hook(),
 				'status'               => ( $action->is_finished() ? self::STATUS_COMPLETE : self::STATUS_PENDING ),
-				'scheduled_date_gmt'   => $this->get_timestamp( $action, $date ),
-				'scheduled_date_local' => $this->get_local_timestamp( $action, $date ),
+				'scheduled_date_gmt'   => $this->get_scheduled_date_string( $action, $date ),
+				'scheduled_date_local' => $this->get_scheduled_date_string_local( $action, $date ),
 				'args'                 => json_encode( $action->get_args() ),
 				'schedule'             => serialize( $action->get_schedule() ),
 				'group_id'             => $this->get_group_id( $action->get_group() ),
@@ -44,30 +44,6 @@ class DB_Store extends ActionScheduler_Store {
 		} catch ( \Exception $e ) {
 			throw new \RuntimeException( sprintf( __( 'Error saving action: %s', 'action-scheduler' ), $e->getMessage() ), 0 );
 		}
-	}
-
-	protected function get_timestamp( ActionScheduler_Action $action, \DateTime $date = null ) {
-		$next = is_null( $date ) ? $action->get_schedule()->next() : $date;
-		if ( ! $next ) {
-			throw new \InvalidArgumentException( __( 'Invalid schedule. Cannot save action.', 'action-scheduler' ) );
-		}
-		$next->setTimezone( new \DateTimeZone( 'UTC' ) );
-
-		return $next->format( 'Y-m-d H:i:s' );
-	}
-
-	protected function get_local_timestamp( ActionScheduler_Action $action, \DateTime $date = null ) {
-		$next = is_null( $date ) ? $action->get_schedule()->next() : $date;
-		if ( ! $next ) {
-			throw new \InvalidArgumentException( __( 'Invalid schedule. Cannot save action.', 'action-scheduler' ) );
-		}
-		$next->setTimezone( $this->get_local_timezone() );
-
-		return $next->format( 'Y-m-d H:i:s' );
-	}
-
-	protected function get_local_timezone() {
-		return \ActionScheduler_TimezoneHelper::get_local_timezone();
 	}
 
 	protected function get_group_id( $slug, $create_if_not_exists = true ) {
