@@ -28,8 +28,8 @@ class Plugin {
 	 *
 	 * @param Migration_Scheduler $migration_scheduler
 	 */
-	public function __construct( Migration_Scheduler $migration_scheduler = null ) {
-		$this->migration_scheduler = $migration_scheduler ?: new Migration_Scheduler();
+	public function __construct( Migration_Scheduler $migration_scheduler ) {
+		$this->migration_scheduler = $migration_scheduler;
 	}
 
 	/**
@@ -141,7 +141,7 @@ class Plugin {
 
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self();
+			self::$instance = new static( new Migration_Scheduler() );
 		}
 
 		return self::$instance;
