@@ -3,6 +3,8 @@
 
 namespace Action_Scheduler\Custom_Tables;
 
+use Action_Scheduler\Custom_Tables\Migration\Migration_Scheduler;
+
 /**
  * Class Plugin
  *
@@ -18,6 +20,18 @@ namespace Action_Scheduler\Custom_Tables;
 class Plugin {
 	private static $instance;
 
+	/** @var Migration_Scheduler */
+	private $migration_scheduler;
+
+	/**
+	 * Plugin constructor.
+	 *
+	 * @param Migration_Scheduler $migration_scheduler
+	 */
+	public function __construct( Migration_Scheduler $migration_scheduler ) {
+		$this->migration_scheduler = $migration_scheduler;
+	}
+
 	/**
 	 * Override the action store with our own
 	 *
@@ -26,8 +40,7 @@ class Plugin {
 	 * @return string
 	 */
 	public function set_store_class( $class ) {
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( $scheduler->is_migration_complete() ) {
+		if ( $this->migration_scheduler->is_migration_complete() ) {
 			return DB_Store::class;
 		} else {
 			return Hybrid_Store::class;
@@ -63,26 +76,11 @@ class Plugin {
 	 * @return void
 	 */
 	public function schedule_migration() {
-
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( false === $scheduler->do_background_migration() || $scheduler->is_migration_scheduled() ) {
+		if ( $this->migration_scheduler->is_migration_complete() || $this->migration_scheduler->is_migration_scheduled() ) {
 			return;
 		}
-		$scheduler->schedule_migration();
-	}
 
-	/**
-	 * Attach the callback to run the background migration process
-	 *
-	 * @return void
-	 */
-	public function hook_scheduled_migration() {
-
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( false === $scheduler->do_background_migration() ) {
-			return;
-		}
-		$scheduler->hook();
+		$this->migration_scheduler->schedule_migration();
 	}
 
 	/**
@@ -101,8 +99,7 @@ class Plugin {
 	}
 
 	public function hook_admin_notices() {
-		$scheduler = new Migration\Migration_Scheduler();
-		if ( $scheduler->is_migration_complete() ) {
+		if ( $this->migration_scheduler->is_migration_complete() ) {
 			return;
 		}
 		add_action( 'admin_notices', [ $this, 'display_migration_notice' ], 10, 0 );
@@ -117,12 +114,25 @@ class Plugin {
 		add_filter( 'action_scheduler_store_class', [ $this, 'set_store_class' ], 10, 1 );
 		add_filter( 'action_scheduler_logger_class', [ $this, 'set_logger_class' ], 10, 1 );
 		add_action( 'plugins_loaded', [ $this, 'register_cli_command' ], 10, 0 );
-		add_action( 'plugins_loaded', [ $this, 'hook_scheduled_migration' ], 1000, 0 );
+		add_action( 'init', [ $this, 'maybe_hook_migration' ] );
 		add_action( 'shutdown', [ $this, 'schedule_migration' ], 0, 0 );
 
 		// Action Scheduler may be displayed as a Tools screen or WooCommerce > Status administration screen
 		add_action( 'load-tools_page_action-scheduler', [ $this, 'hook_admin_notices' ], 10, 0 );
 		add_action( 'load-woocommerce_page_wc-status', [ $this, 'hook_admin_notices' ], 10, 0 );
+	}
+
+	/**
+	 * Possibly hook the migration scheduler action.
+	 *
+	 * @author Jeremy Pry
+	 */
+	public function maybe_hook_migration() {
+		if ( $this->migration_scheduler->is_migration_complete() ) {
+			return;
+		}
+
+		$this->migration_scheduler->hook();
 	}
 
 	public static function init() {
@@ -131,7 +141,7 @@ class Plugin {
 
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
-			self::$instance = new self();
+			self::$instance = new static( new Migration_Scheduler() );
 		}
 
 		return self::$instance;
