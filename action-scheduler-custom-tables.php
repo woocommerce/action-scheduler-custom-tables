@@ -5,7 +5,7 @@
  * Description: Improved scalability for the Action Scheduler library using custom tables
  * Author: Prospress
  * Author URI: http://prospress.com/
- * Version: 1.0.0-dev
+ * Version: 1.0.0-branch-uyum
  */
 
 namespace Action_Scheduler\Custom_Tables;
