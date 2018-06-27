@@ -46,6 +46,13 @@ class DB_Store extends ActionScheduler_Store {
 		}
 	}
 
+	/**
+	 * Get a group's ID based on its name/slug.
+	 *
+	 * @param string $slug The string name of a group.
+	 * @param bool $create_if_not_exists Whether to create the group if it does not already exist. Default, true - create the group.
+	 * @return int The group's ID, if it exists or is created, or 0 if it does not exist and is not created.
+	 */
 	protected function get_group_id( $slug, $create_if_not_exists = true ) {
 		if ( empty( $slug ) ) {
 			return 0;
