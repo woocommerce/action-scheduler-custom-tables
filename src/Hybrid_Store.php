@@ -188,8 +188,8 @@ class Hybrid_Store extends Store {
 	 *
 	 * @return ActionScheduler_ActionClaim
 	 */
-	public function stake_claim( $max_actions = 10, DateTime $before_date = null ) {
-		$claim = $this->secondary_store->stake_claim( $max_actions, $before_date );
+	public function stake_claim( $max_actions = 10, DateTime $before_date = null, $hooks = array() ) {
+		$claim = $this->secondary_store->stake_claim( $max_actions, $before_date, $hooks );
 
 		$claimed_actions = $claim->get_actions();
 		if ( ! empty( $claimed_actions ) ) {
@@ -198,7 +198,7 @@ class Hybrid_Store extends Store {
 
 		$this->secondary_store->release_claim( $claim );
 
-		return $this->primary_store->stake_claim( $max_actions, $before_date );
+		return $this->primary_store->stake_claim( $max_actions, $before_date, $hooks );
 	}
 
 	private function migrate( $action_ids ) {

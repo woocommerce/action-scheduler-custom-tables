@@ -77,6 +77,47 @@ class DB_Store_Test extends UnitTestCase {
 		$this->assertEqualSets( array_slice( $created_actions, 3, 3 ), $claim->get_actions() );
 	}
 
+	public function test_claim_actions_by_hooks() {
+		$created_actions = $created_actions_by_hook = [];
+		$store           = new DB_Store();
+		$unique_hook_one = 'my_unique_hook_one';
+		$unique_hook_two = 'my_unique_hook_two';
+		$unique_hooks    = array(
+			$unique_hook_one,
+			$unique_hook_two,
+		);
+
+		for ( $i = 3; $i > - 3; $i -- ) {
+			foreach ( $unique_hooks as $unique_hook ) {
+				$time     = as_get_datetime_object( $i . ' hours' );
+				$schedule = new ActionScheduler_SimpleSchedule( $time );
+				$action   = new ActionScheduler_Action( $unique_hook, [ $i ], $schedule, 'my_group' );
+
+				$action_id         = $store->save_action( $action );
+				$created_actions[] = $created_actions_by_hook[ $unique_hook ][] = $action_id;
+			}
+		}
+
+		$claim = $store->stake_claim( 10, null, $unique_hooks );
+		$this->assertInstanceof( 'ActionScheduler_ActionClaim', $claim );
+		$this->assertCount( 6, $claim->get_actions() );
+		$this->assertEqualSets( array_slice( $created_actions, 6, 6 ), $claim->get_actions() );
+
+		$store->release_claim( $claim );
+
+		$claim = $store->stake_claim( 10, null, array( $unique_hook_one ) );
+		$this->assertInstanceof( 'ActionScheduler_ActionClaim', $claim );
+		$this->assertCount( 3, $claim->get_actions() );
+		$this->assertEqualSets( array_slice( $created_actions_by_hook[ $unique_hook_one ], 3, 3 ), $claim->get_actions() );
+
+		$store->release_claim( $claim );
+
+		$claim = $store->stake_claim( 10, null, array( $unique_hook_two ) );
+		$this->assertInstanceof( 'ActionScheduler_ActionClaim', $claim );
+		$this->assertCount( 3, $claim->get_actions() );
+		$this->assertEqualSets( array_slice( $created_actions_by_hook[ $unique_hook_two ], 3, 3 ), $claim->get_actions() );
+	}
+
 	public function test_duplicate_claim() {
 		$created_actions = [];
 		$store           = new DB_Store();
