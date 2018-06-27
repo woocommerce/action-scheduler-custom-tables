@@ -395,9 +395,9 @@ class DB_Store extends ActionScheduler_Store {
 	 *
 	 * @return ActionScheduler_ActionClaim
 	 */
-	public function stake_claim( $max_actions = 10, \DateTime $before_date = null, $hooks = array() ) {
+	public function stake_claim( $max_actions = 10, \DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		$claim_id = $this->generate_claim_id();
-		$this->claim_actions( $claim_id, $max_actions, $before_date, $hooks );
+		$this->claim_actions( $claim_id, $max_actions, $before_date, $hooks, $group );
 		$action_ids = $this->find_actions_by_claim_id( $claim_id );
 
 		return new ActionScheduler_ActionClaim( $claim_id, $action_ids );
@@ -421,7 +421,7 @@ class DB_Store extends ActionScheduler_Store {
 	 * @return int The number of actions that were claimed
 	 * @throws \RuntimeException
 	 */
-	protected function claim_actions( $claim_id, $limit, \DateTime $before_date = null, $hooks = array() ) {
+	protected function claim_actions( $claim_id, $limit, \DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		/** @var \wpdb $wpdb */
 		global $wpdb;
 
@@ -444,6 +444,19 @@ class DB_Store extends ActionScheduler_Store {
 			$placeholders = array_fill( 0, count( $hooks ), '%s' );
 			$where       .= ' AND hook IN (' . join( ', ', $placeholders ) . ')';
 			$params       = array_merge( $params, array_values( $hooks ) );
+		}
+
+		if ( ! empty( $group ) ) {
+
+			$group_id = $this->get_group_id( $group, false );
+
+			// throw exception if no matching group found, this matches ActionScheduler_wpPostStore's behaviour
+			if ( empty( $group_id ) ) {
+				throw new InvalidArgumentException( sprintf( __( 'The group "%s" does not exist.', 'action-scheduler' ), $group_slug ) );
+			}
+
+			$where   .= ' AND group_id = %d';
+			$params[] = $group_id;
 		}
 
 		$order    = "ORDER BY attempts ASC, scheduled_date_gmt ASC LIMIT %d";
