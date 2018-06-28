@@ -46,6 +46,13 @@ class DB_Store extends ActionScheduler_Store {
 		}
 	}
 
+	/**
+	 * Get a group's ID based on its name/slug.
+	 *
+	 * @param string $slug The string name of a group.
+	 * @param bool $create_if_not_exists Whether to create the group if it does not already exist. Default, true - create the group.
+	 * @return int The group's ID, if it exists or is created, or 0 if it does not exist and is not created.
+	 */
 	protected function get_group_id( $slug, $create_if_not_exists = true ) {
 		if ( empty( $slug ) ) {
 			return 0;
@@ -388,9 +395,9 @@ class DB_Store extends ActionScheduler_Store {
 	 *
 	 * @return ActionScheduler_ActionClaim
 	 */
-	public function stake_claim( $max_actions = 10, \DateTime $before_date = null ) {
+	public function stake_claim( $max_actions = 10, \DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		$claim_id = $this->generate_claim_id();
-		$this->claim_actions( $claim_id, $max_actions, $before_date );
+		$this->claim_actions( $claim_id, $max_actions, $before_date, $hooks, $group );
 		$action_ids = $this->find_actions_by_claim_id( $claim_id );
 
 		return new ActionScheduler_ActionClaim( $claim_id, $action_ids );
@@ -414,7 +421,7 @@ class DB_Store extends ActionScheduler_Store {
 	 * @return int The number of actions that were claimed
 	 * @throws \RuntimeException
 	 */
-	protected function claim_actions( $claim_id, $limit, \DateTime $before_date = null ) {
+	protected function claim_actions( $claim_id, $limit, \DateTime $before_date = null, $hooks = array(), $group = '' ) {
 		/** @var \wpdb $wpdb */
 		global $wpdb;
 
@@ -422,16 +429,40 @@ class DB_Store extends ActionScheduler_Store {
 		$date = is_null( $before_date ) ? $now : clone $before_date;
 
 		// can't use $wpdb->update() because of the <= condition
-		$sql = "UPDATE {$wpdb->actionscheduler_actions} SET claim_id=%d, last_attempt_gmt=%s, last_attempt_local=%s WHERE claim_id = 0 AND scheduled_date_gmt <= %s AND status=%s ORDER BY attempts ASC, scheduled_date_gmt ASC LIMIT %d";
-
-		$sql = $wpdb->prepare( $sql, [
+		$update = "UPDATE {$wpdb->actionscheduler_actions} SET claim_id=%d, last_attempt_gmt=%s, last_attempt_local=%s";
+		$params = array(
 			$claim_id,
 			$now->format( 'Y-m-d H:i:s' ),
 			current_time( 'mysql' ),
-			$date->format( 'Y-m-d H:i:s' ),
-			self::STATUS_PENDING,
-			$limit,
-		] );
+		);
+
+		$where    = "WHERE claim_id = 0 AND scheduled_date_gmt <= %s AND status=%s";
+		$params[] = $date->format( 'Y-m-d H:i:s' );
+		$params[] = self::STATUS_PENDING;
+
+		if ( ! empty( $hooks ) ) {
+			$placeholders = array_fill( 0, count( $hooks ), '%s' );
+			$where       .= ' AND hook IN (' . join( ', ', $placeholders ) . ')';
+			$params       = array_merge( $params, array_values( $hooks ) );
+		}
+
+		if ( ! empty( $group ) ) {
+
+			$group_id = $this->get_group_id( $group, false );
+
+			// throw exception if no matching group found, this matches ActionScheduler_wpPostStore's behaviour
+			if ( empty( $group_id ) ) {
+				throw new InvalidArgumentException( sprintf( __( 'The group "%s" does not exist.', 'action-scheduler' ), $group_slug ) );
+			}
+
+			$where   .= ' AND group_id = %d';
+			$params[] = $group_id;
+		}
+
+		$order    = "ORDER BY attempts ASC, scheduled_date_gmt ASC LIMIT %d";
+		$params[] = $limit;
+
+		$sql = $wpdb->prepare( "{$update} {$where} {$order}", $params );
 
 		$rows_affected = $wpdb->query( $sql );
 		if ( $rows_affected === false ) {
