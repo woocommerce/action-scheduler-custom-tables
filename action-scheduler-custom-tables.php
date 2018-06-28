@@ -5,7 +5,7 @@
  * Description: Improved scalability for the Action Scheduler library using custom tables
  * Author: Prospress
  * Author URI: http://prospress.com/
- * Version: 1.0.0-dev
+ * Version: 1.0.0-beta-1
  */
 
 namespace Action_Scheduler\Custom_Tables;
