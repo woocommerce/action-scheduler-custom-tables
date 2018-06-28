@@ -82,17 +82,17 @@ class Migration_Scheduler {
 	}
 
 	/**
-	 * @return int Seconds between migration runs. Defaults to five minutes.
+	 * @return int Seconds between migration runs. Defaults to two minutes.
 	 */
 	private function get_schedule_interval() {
-		return (int) apply_filters( 'action_scheduler/custom_tables/migration_interval', 5 * MINUTE_IN_SECONDS );
+		return (int) apply_filters( 'action_scheduler/custom_tables/migration_interval', 2 * MINUTE_IN_SECONDS );
 	}
 
 	/**
-	 * @return int Number of actions to migrate in each batch. Defaults to 100.
+	 * @return int Number of actions to migrate in each batch. Defaults to 1000.
 	 */
 	private function get_batch_size() {
-		return (int) apply_filters( 'action_scheduler/custom_tables/migration_batch_size', 100 );
+		return (int) apply_filters( 'action_scheduler/custom_tables/migration_batch_size', 1000 );
 	}
 
 	/**
