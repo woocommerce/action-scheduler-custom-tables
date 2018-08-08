@@ -455,7 +455,7 @@ class DB_Store extends ActionScheduler_Store {
 
 			// throw exception if no matching group found, this matches ActionScheduler_wpPostStore's behaviour
 			if ( empty( $group_id ) ) {
-				throw new InvalidArgumentException( sprintf( __( 'The group "%s" does not exist.', 'action-scheduler' ), $group_slug ) );
+				throw new InvalidArgumentException( sprintf( __( 'The group "%s" does not exist.', 'action-scheduler' ), $group ) );
 			}
 
 			$where   .= ' AND group_id = %d';
