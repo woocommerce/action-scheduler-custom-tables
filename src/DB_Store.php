@@ -199,7 +199,10 @@ class DB_Store extends ActionScheduler_Store {
 		$sql .= "FROM {$wpdb->actionscheduler_actions} a";
 		$sql_params = [];
 
-		$sql .= " LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id=a.group_id";
+		if ( ! empty( $query[ 'group' ] ) ) {
+			$sql .= " LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id=a.group_id";
+		}
+
 		$sql .= " WHERE 1=1";
 
 		if ( ! empty( $query[ 'group' ] ) ) {
