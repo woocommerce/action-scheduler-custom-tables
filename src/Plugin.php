@@ -20,6 +20,9 @@ use Action_Scheduler\Custom_Tables\Migration\Migration_Scheduler;
 class Plugin {
 	private static $instance;
 
+	/** @var Dependencies */
+	private static $dependency_handler;
+
 	/** @var Migration_Scheduler */
 	private $migration_scheduler;
 
@@ -28,8 +31,9 @@ class Plugin {
 	 *
 	 * @param Migration_Scheduler $migration_scheduler
 	 */
-	public function __construct( Migration_Scheduler $migration_scheduler ) {
+	public function __construct( Migration_Scheduler $migration_scheduler, Dependencies $dependency_handler ) {
 		$this->migration_scheduler = $migration_scheduler;
+		self::$dependency_handler  = $dependency_handler;
 	}
 
 	/**
@@ -136,12 +140,19 @@ class Plugin {
 	}
 
 	public static function init() {
-		self::instance()->hook();
+
+		self::instance();
+
+		if ( ! self::$dependency_handler->dependencies_met() ) {
+			self::instance()->hook();
+		} else {
+			self::$dependency_handler->add_notice();
+		}
 	}
 
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
-			self::$instance = new static( new Migration_Scheduler() );
+			self::$instance = new static( new Migration_Scheduler(), new Dependencies() );
 		}
 
 		return self::$instance;
