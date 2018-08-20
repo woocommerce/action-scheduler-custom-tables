@@ -35,7 +35,7 @@ class DB_Store_Table_Maker extends Table_Maker {
 
 				return "CREATE TABLE {$table_name} (
 				        action_id bigint(20) unsigned NOT NULL auto_increment,
-				        hook varchar(255) NOT NULL,
+				        hook varchar(191) NOT NULL,
 				        status varchar(20) NOT NULL,
 				        scheduled_date_gmt datetime NOT NULL default '0000-00-00 00:00:00',
 				        scheduled_date_local datetime NOT NULL default '0000-00-00 00:00:00',
