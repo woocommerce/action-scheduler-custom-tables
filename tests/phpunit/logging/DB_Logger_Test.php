@@ -18,7 +18,7 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_add_log_entry() {
-		$action_id = wc_schedule_single_action( time(), __METHOD__ );
+		$action_id = as_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$message = 'Logging that something happened';
 		$log_id = $logger->log( $action_id, $message );
@@ -36,7 +36,7 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_storage_logs() {
-		$action_id = wc_schedule_single_action( time(), __METHOD__ );
+		$action_id = as_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$logs = $logger->get_logs( $action_id );
 		$expected = new ActionScheduler_LogEntry( $action_id, 'action created' );
@@ -46,7 +46,7 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_execution_logs() {
-		$action_id = wc_schedule_single_action( time(), __METHOD__ );
+		$action_id = as_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$started = new ActionScheduler_LogEntry( $action_id, 'action started' );
 		$finished = new ActionScheduler_LogEntry( $action_id, 'action complete' );
@@ -70,7 +70,7 @@ class DB_Logger_Test extends UnitTestCase {
 	public function test_failed_execution_logs() {
 		$hook = __METHOD__;
 		add_action( $hook, array( $this, '_a_hook_callback_that_throws_an_exception' ) );
-		$action_id = wc_schedule_single_action( time(), $hook );
+		$action_id = as_schedule_single_action( time(), $hook );
 		$logger = ActionScheduler::logger();
 		$started = new ActionScheduler_LogEntry( $action_id, 'action started' );
 		$finished = new ActionScheduler_LogEntry( $action_id, 'action complete' );
@@ -94,7 +94,7 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_fatal_error_log() {
-		$action_id = wc_schedule_single_action( time(), __METHOD__ );
+		$action_id = as_schedule_single_action( time(), __METHOD__ );
 		$logger = ActionScheduler::logger();
 		do_action( 'action_scheduler_unexpected_shutdown', $action_id, array(
 			'type' => E_ERROR,
@@ -114,8 +114,8 @@ class DB_Logger_Test extends UnitTestCase {
 	}
 
 	public function test_canceled_action_log() {
-		$action_id = wc_schedule_single_action( time(), __METHOD__ );
-		wc_unschedule_action( __METHOD__ );
+		$action_id = as_schedule_single_action( time(), __METHOD__ );
+		as_unschedule_action( __METHOD__ );
 		$logger = ActionScheduler::logger();
 		$logs = $logger->get_logs( $action_id );
 		$expected = new ActionScheduler_LogEntry( $action_id, 'action canceled' );

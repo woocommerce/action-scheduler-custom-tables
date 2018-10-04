@@ -56,7 +56,7 @@ class Migration_Scheduler {
 	 * @return bool Whether there is a pending action in the store to handle the migration
 	 */
 	public function is_migration_scheduled() {
-		$next = wc_next_scheduled_action( self::HOOK );
+		$next = as_next_scheduled_action( self::HOOK );
 
 		return ! empty( $next );
 	}
@@ -71,14 +71,14 @@ class Migration_Scheduler {
 			$when = time();
 		}
 
-		return wc_schedule_single_action( $when, self::HOOK, [], self::GROUP );
+		return as_schedule_single_action( $when, self::HOOK, [], self::GROUP );
 	}
 
 	/**
 	 * Removes the scheduled migration action
 	 */
 	public function unschedule_migration() {
-		wc_unschedule_action( self::HOOK, null, self::GROUP );
+		as_unschedule_action( self::HOOK, null, self::GROUP );
 	}
 
 	/**
