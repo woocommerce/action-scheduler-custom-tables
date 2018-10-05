@@ -9,6 +9,7 @@ use ActionScheduler_FinishedAction;
 use ActionScheduler_NullAction;
 use ActionScheduler_NullSchedule;
 use ActionScheduler_Store;
+use ActionScheduler_TimezoneHelper;
 
 class DB_Store extends ActionScheduler_Store {
 
@@ -367,8 +368,8 @@ class DB_Store extends ActionScheduler_Store {
 	 */
 	public function get_date( $action_id ) {
 		$date = $this->get_date_gmt( $action_id );
-
-		return $date->setTimezone( $this->get_local_timezone() );
+		ActionScheduler_TimezoneHelper::set_local_timezone( $date );
+		return $date;
 	}
 
 	/**

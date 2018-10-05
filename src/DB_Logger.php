@@ -26,7 +26,7 @@ class DB_Logger extends \ActionScheduler_Logger {
 		}
 
 		$date_gmt = $date->format( 'Y-m-d H:i:s' );
-		$date->setTimezone( ActionScheduler_TimezoneHelper::get_local_timezone() );
+		ActionScheduler_TimezoneHelper::set_local_timezone( $date );
 		$date_local = $date->format( 'Y-m-d H:i:s' );
 
 		/** @var \wpdb $wpdb */
