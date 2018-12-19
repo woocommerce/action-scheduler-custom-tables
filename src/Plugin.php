@@ -80,7 +80,7 @@ class Plugin {
 	 * @return void
 	 */
 	public function schedule_migration() {
-		if ( $this->migration_scheduler->is_migration_complete() || $this->migration_scheduler->is_migration_scheduled() ) {
+		if ( ! self::$dependency_handler->dependencies_met() || $this->migration_scheduler->is_migration_complete() || $this->migration_scheduler->is_migration_scheduled() ) {
 			return;
 		}
 
