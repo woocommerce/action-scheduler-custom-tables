@@ -12,5 +12,4 @@ namespace Action_Scheduler\Custom_Tables;
 
 require_once( __DIR__ . '/vendor/autoload.php' );
 
-// We need to hook in at the obscure 0.5 priority here, because ActionScheduler_Versions::initialize_latest_version() is attached at priority 1, while action_scheduler_register_{version_number_string}() callbacks at attached at priority 0
-add_action( 'plugins_loaded', [ Plugin::class, 'init' ], 0.5, 0 );
+add_action( 'action_scheduler_pre_init', [ Plugin::class, 'init' ], 5, 0 );
