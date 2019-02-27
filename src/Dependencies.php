@@ -57,7 +57,7 @@ class Dependencies {
 			printf( esc_html__( 'The %1$sAction Scheduler library%2$s version %3$s or newer must be active for this plugin to work. Action Scheduler version %4$s was detected. Please %5$supdate Action Scheduler as a plugin &raquo;%6$s', 'action-scheduler' ), '<a href="https://github.com/prospress/action-scheduler">', '</a>', $this->min_version, $this->get_action_scheduler_version(), '<a href="' .  esc_url( $plugins_url ) . '">', '</a>' );
 		} elseif ( ! $this->is_action_scheduler_old_enough() ) {
 			// translators: 1$-2$: link tags to the Action Scheduler GitHub page, 3$-4$: version number, e.g. 2.1.0 5$-6$: link tags for Plugins administration screen
-			printf( esc_html__( 'This plugin is only required with %1$sAction Scheduler%2$s version %3$s or older. Action Scheduler version %4$s was detected. Please disable and delete the Action Scheduler Custom Tables plugin on the %5$sPlugins Administration screen &raquo;%6$s', 'action-scheduler' ), '<a href="https://github.com/prospress/action-scheduler">', '</a>', $this->max_version, $this->get_action_scheduler_version(), '<a href="' .  esc_url( $plugins_url ) . '">', '</a>' );
+			printf( esc_html__( 'This plugin is only required with %1$sAction Scheduler%2$s versions prior to %3$s. Action Scheduler version %4$s was detected. Please disable and delete the Action Scheduler Custom Tables plugin on the %5$sPlugins Administration screen &raquo;%6$s', 'action-scheduler' ), '<a href="https://github.com/prospress/action-scheduler">', '</a>', $this->max_version, $this->get_action_scheduler_version(), '<a href="' .  esc_url( $plugins_url ) . '">', '</a>' );
 		}
 		?>
 	</p>
