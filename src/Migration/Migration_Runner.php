@@ -27,6 +27,8 @@ class Migration_Runner {
 			$this->action_migrator = new Action_Migrator( $this->source_store, $this->destination_store );
 			$this->log_migrator    = new Log_Migrator( $this->source_logger, $this->destination_logger );
 		}
+
+		$this->action_migrator->set_log_migrator( $this->log_migrator );
 	}
 
 	public function run( $batch_size = 10 ) {
@@ -40,10 +42,11 @@ class Migration_Runner {
 	public function migrate_actions( array $action_ids ) {
 		do_action( 'action_scheduler/custom_tables/migration_batch_starting', $action_ids );
 
+		remove_all_actions( 'action_scheduler_stored_action' );
+
 		foreach ( $action_ids as $source_action_id ) {
 			$destination_action_id = $this->action_migrator->migrate( $source_action_id );
 			if ( $destination_action_id ) {
-				$this->log_migrator->migrate( $source_action_id, $destination_action_id );
 				$this->destination_logger->log( $destination_action_id, sprintf(
 					__( 'Migrated action with ID %d in %s to ID %d in %s', 'action-scheduler' ),
 					$source_action_id,

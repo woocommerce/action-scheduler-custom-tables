@@ -7,6 +7,7 @@ namespace Action_Scheduler\Custom_Tables\Migration;
 class Action_Migrator {
 	private $source;
 	private $destination;
+	private $log_migrator;
 
 	public function __construct( \ActionScheduler_Store $source_store, \ActionScheduler_Store $destination_store ) {
 		$this->source      = $source_store;
@@ -50,9 +51,11 @@ class Action_Migrator {
 
 
 		try {
-			if ( $status == \ActionScheduler_Store::STATUS_FAILED ) {
+			if ( $status === \ActionScheduler_Store::STATUS_FAILED ) {
 				$this->destination->mark_failure( $destination_action_id );
 			}
+
+			$this->log_migrator->migrate( $source_action_id, $destination_action_id );
 			$this->source->delete_action( $source_action_id );
 
 			do_action( 'action_scheduler/custom_tables/migrated_action', $source_action_id, $destination_action_id, $this->source, $this->destination );
@@ -65,5 +68,9 @@ class Action_Migrator {
 
 			return $destination_action_id;
 		}
+	}
+
+	public function set_log_migrator( Log_Migrator $log_migrator ) {
+		$this->log_migrator = $log_migrator;
 	}
 }
