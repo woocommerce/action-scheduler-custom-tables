@@ -9,9 +9,10 @@ class Action_Migrator {
 	private $destination;
 	private $log_migrator;
 
-	public function __construct( \ActionScheduler_Store $source_store, \ActionScheduler_Store $destination_store ) {
-		$this->source      = $source_store;
-		$this->destination = $destination_store;
+	public function __construct( \ActionScheduler_Store $source_store, \ActionScheduler_Store $destination_store, Log_Migrator $log_migrator ) {
+		$this->source       = $source_store;
+		$this->destination  = $destination_store;
+		$this->log_migrator = $log_migrator;
 	}
 
 	public function migrate( $source_action_id ) {
@@ -68,9 +69,5 @@ class Action_Migrator {
 
 			return $destination_action_id;
 		}
-	}
-
-	public function set_log_migrator( Log_Migrator $log_migrator ) {
-		$this->log_migrator = $log_migrator;
 	}
 }
