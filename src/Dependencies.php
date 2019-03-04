@@ -18,7 +18,7 @@ class Dependencies {
 	/**
 	 * @var string
 	 */
-	private $max_version = '3.1.0';
+	private $max_version = '3.0.0';
 
 	/**
 	 * Check Action Scheduler class is available and at required versions.

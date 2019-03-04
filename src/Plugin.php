@@ -140,9 +140,10 @@ class Plugin {
 	}
 
 	public static function init() {
+
 		self::instance();
 
-		if ( self::$dependency_handler->dependencies_met() ) {
+		if ( ! self::$dependency_handler->dependencies_met() ) {
 			self::instance()->hook();
 		} else {
 			self::$dependency_handler->add_notice();
