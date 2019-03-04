@@ -252,6 +252,21 @@ class DB_Store extends ActionScheduler_Store {
 			$sql_params[] = $query[ 'claimed' ];
 		}
 
+		if ( ! empty( $query['search'] ) ) {
+			$sql .= " AND (a.hook LIKE %s OR a.args LIKE %s";
+			for( $i = 0; $i < 2; $i++ ) {
+				$sql_params[] = sprintf( '%%%s%%', $query['search'] );
+			}
+
+			$search_claim_id = (int) $query['search'];
+			if ( $search_claim_id ) {
+				$sql .= ' OR a.claim_id = %d';
+				$sql_params[] = $search_claim_id;
+			}
+
+			$sql .= ')';
+		}
+
 		if ( 'select' === $select_or_count ) {
 			switch ( $query['orderby'] ) {
 				case 'hook':
