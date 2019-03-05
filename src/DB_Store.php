@@ -196,11 +196,11 @@ class DB_Store extends ActionScheduler_Store {
 
 		/** @var \wpdb $wpdb */
 		global $wpdb;
-		$sql  = ( 'count' === $select_or_count ) ? 'SELECT count(a.action_id)' : 'SELECT a.action_id ';
-		$sql .= "FROM {$wpdb->actionscheduler_actions} a";
+		$sql  = ( 'count' === $select_or_count ) ? 'SELECT count(a.action_id)' : 'SELECT a.action_id';
+		$sql .= " FROM {$wpdb->actionscheduler_actions} a";
 		$sql_params = [];
 
-		if ( ! empty( $query[ 'group' ] ) ) {
+		if ( ! empty( $query[ 'group' ] ) || 'group' === $query[ 'orderby' ] ) {
 			$sql .= " LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id=a.group_id";
 		}
 
