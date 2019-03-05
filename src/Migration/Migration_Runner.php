@@ -40,8 +40,8 @@ class Migration_Runner {
 	public function migrate_actions( array $action_ids ) {
 		do_action( 'action_scheduler/custom_tables/migration_batch_starting', $action_ids );
 
-		remove_action( 'action_scheduler_stored_action', array( \ActionScheduler::logger(), 'log_stored_action', 10 ) );
-		remove_action( 'action_scheduler_stored_action', array( $this->destination_logger, 'log_stored_action', 10 ) );
+		remove_action( 'action_scheduler_stored_action', array( \ActionScheduler::logger(), 'log_stored_action' ), 10 );
+		remove_action( 'action_scheduler_stored_action', array( $this->destination_logger, 'log_stored_action' ), 10 );
 
 		foreach ( $action_ids as $source_action_id ) {
 			$destination_action_id = $this->action_migrator->migrate( $source_action_id );
@@ -55,6 +55,9 @@ class Migration_Runner {
 				) );
 			}
 		}
+
+		add_action( 'action_scheduler_stored_action', array( \ActionScheduler::logger(), 'log_stored_action' ), 10 , 1 );
+		add_action( 'action_scheduler_stored_action', array( $this->destination_logger, 'log_stored_action' ), 10, 1 );
 
 		do_action( 'action_scheduler/custom_tables/migration_batch_complete', $action_ids );
 	}
