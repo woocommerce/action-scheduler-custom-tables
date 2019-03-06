@@ -19,7 +19,7 @@ class Log_Migrator {
 		$logs = $this->source->get_logs( $source_action_id );
 		foreach ( $logs as $log ) {
 			if ( $log->get_action_id() == $source_action_id ) {
-				$this->destination->log( $destination_action_id, $log->get_message() );
+				$this->destination->log( $destination_action_id, $log->get_message(), $log->get_date() );
 			}
 		}
 	}

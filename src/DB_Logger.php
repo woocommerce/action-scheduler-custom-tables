@@ -64,7 +64,9 @@ class DB_Logger extends \ActionScheduler_Logger {
 			return new ActionScheduler_NullLogEntry();
 		}
 
-		return new ActionScheduler_LogEntry( $record->action_id, $record->message );
+		$date = as_get_datetime_object( $record->log_date_gmt );
+
+		return new ActionScheduler_LogEntry( $record->action_id, $record->message, $date );
 	}
 
 	/**

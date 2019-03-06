@@ -21,11 +21,11 @@ class Migration_Runner {
 
 		$this->batch_fetcher = new Batch_Fetcher( $this->source_store );
 		if ( $config->get_dry_run() ) {
-			$this->action_migrator = new Dry_Run_Action_Migrator( $this->source_store, $this->destination_store );
 			$this->log_migrator    = new Dry_Run_Log_Migrator( $this->source_logger, $this->destination_logger );
+			$this->action_migrator = new Dry_Run_Action_Migrator( $this->source_store, $this->destination_store, $this->log_migrator );
 		} else {
-			$this->action_migrator = new Action_Migrator( $this->source_store, $this->destination_store );
 			$this->log_migrator    = new Log_Migrator( $this->source_logger, $this->destination_logger );
+			$this->action_migrator = new Action_Migrator( $this->source_store, $this->destination_store, $this->log_migrator );
 		}
 	}
 
@@ -40,10 +40,12 @@ class Migration_Runner {
 	public function migrate_actions( array $action_ids ) {
 		do_action( 'action_scheduler/custom_tables/migration_batch_starting', $action_ids );
 
+		remove_action( 'action_scheduler_stored_action', array( \ActionScheduler::logger(), 'log_stored_action' ), 10 );
+		remove_action( 'action_scheduler_stored_action', array( $this->destination_logger, 'log_stored_action' ), 10 );
+
 		foreach ( $action_ids as $source_action_id ) {
 			$destination_action_id = $this->action_migrator->migrate( $source_action_id );
 			if ( $destination_action_id ) {
-				$this->log_migrator->migrate( $source_action_id, $destination_action_id );
 				$this->destination_logger->log( $destination_action_id, sprintf(
 					__( 'Migrated action with ID %d in %s to ID %d in %s', 'action-scheduler' ),
 					$source_action_id,
@@ -53,6 +55,9 @@ class Migration_Runner {
 				) );
 			}
 		}
+
+		add_action( 'action_scheduler_stored_action', array( \ActionScheduler::logger(), 'log_stored_action' ), 10 , 1 );
+		add_action( 'action_scheduler_stored_action', array( $this->destination_logger, 'log_stored_action' ), 10, 1 );
 
 		do_action( 'action_scheduler/custom_tables/migration_batch_complete', $action_ids );
 	}
