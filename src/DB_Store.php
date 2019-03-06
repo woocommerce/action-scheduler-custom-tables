@@ -39,6 +39,13 @@ class DB_Store extends ActionScheduler_Store {
 			$wpdb->insert( $wpdb->actionscheduler_actions, $data );
 			$action_id = $wpdb->insert_id;
 
+			if ( is_wp_error( $action_id ) ) {
+				throw new RuntimeException( $action_id->get_error_message() );
+			}
+			elseif ( empty( $action_id ) ) {
+				throw new RuntimeException( $wpdb->last_error ? $wpdb->last_error : __( 'Database error.', 'action-scheduler' ) );
+			}
+
 			do_action( 'action_scheduler_stored_action', $action_id );
 
 			return $action_id;
